@@ -584,17 +584,38 @@ else if (config.ETA == 4)
  *              - const uint8_t seed[]: byte array with seed of length CRHBYTES
  *              - uint16_t nonce: 16-bit nonce
  **************************************************/
-#define POLY_UNIFORM_GAMMA1_NBLOCKS ((POLYZ_PACKEDBYTES + STREAM256_BLOCKBYTES - 1)/STREAM256_BLOCKBYTES)
-    void poly_uniform_gamma1(poly *a,
-                         const uint8_t seed[CRHBYTES],
-                             uint16_t nonce)
+public static int POLY_UNIFORM_GAMMA1_NBLOCKS= ((config.POLYZ_PACKEDBYTES + config.STREAM256_BLOCKBYTES - 1)/config.STREAM256_BLOCKBYTES);
+    void poly_uniform_gamma1(int aIndex,poly a,
+                         int seedIndex,int[] seed,
+                             int nonce)
     {
-        uint8_t buf[POLY_UNIFORM_GAMMA1_NBLOCKS*STREAM256_BLOCKBYTES];
-        stream256_state state;
+        int[] buf=new int[POLY_UNIFORM_GAMMA1_NBLOCKS*config.STREAM256_BLOCKBYTES];
+        int bufIndex=0;
 
-        stream256_init(&state, seed, nonce);
-        stream256_squeezeblocks(buf, POLY_UNIFORM_GAMMA1_NBLOCKS, &state);
-        polyz_unpack(a, buf);
+
+
+        aes256ctr_ctx stateAES=null;
+        KeccakState stateKeccak=null;
+
+
+        if(config.isAESUsed==1){
+
+            stateAES = new aes256ctr_ctx();
+            aes256ctr.dilithium_aes256ctr_init(stateAES,seedIndex,seed,nonce);
+            aes256ctr.aes256ctr_squeezeblocks(bufIndex,buf,POLY_UNIFORM_GAMMA1_NBLOCKS,stateAES);
+
+        }else {
+
+            stateKeccak=new KeccakState();
+            Fips202.shake256_init(stateKeccak);
+            Fips202.shake256_squeezeblocks(buf,bufIndex,POLY_UNIFORM_GAMMA1_NBLOCKS,stateKeccak);
+
+
+
+        }
+
+        //check again!
+        polyeta_unpack(aIndex,a,bufIndex,buf);
     }
 
     /*************************************************
@@ -642,9 +663,8 @@ else if (config.ETA == 4)
             } while(b > i);
 
             c.coeffs[i+cIdex] = c.coeffs[b+cIdex];
-            c.coeffs[b+cIdex] = 1 - 2*(signs & 1);
-            signs >>= 1;
-            helkrngont4olntb
+            c.coeffs[b+cIdex] = (new BigInteger("1").subtract(((signs.and(new BigInteger("1")))).multiply(new BigInteger("2")))).and(allOne32).intValue();
+            signs =(signs.shiftRight(1)).and(allOne64);
         }
     }
 
@@ -657,79 +677,89 @@ else if (config.ETA == 4)
      *                            POLYETA_PACKEDBYTES bytes
      *              - const poly *a: pointer to input polynomial
      **************************************************/
-    void polyeta_pack(uint8_t *r, const poly *a) {
-        unsigned int i;
-        uint8_t t[8];
-        DBENCH_START();
+    void polyeta_pack(int rIndex,int[] r, int aIndex,poly a) {
+        int i;
+        int[] t=new int[8];
+        //DBENCH_START();
 
-#if ETA == 2
-        for(i = 0; i < N/8; ++i) {
-            t[0] = ETA - a->coeffs[8*i+0];
-            t[1] = ETA - a->coeffs[8*i+1];
-            t[2] = ETA - a->coeffs[8*i+2];
-            t[3] = ETA - a->coeffs[8*i+3];
-            t[4] = ETA - a->coeffs[8*i+4];
-            t[5] = ETA - a->coeffs[8*i+5];
-            t[6] = ETA - a->coeffs[8*i+6];
-            t[7] = ETA - a->coeffs[8*i+7];
+if (config.ETA == 2)
+        {
+            for(i = 0; i < config.N/8; ++i) {
+                t[0] = config.ETA - a.coeffs[8*i+0];
+                t[1] = config.ETA - a.coeffs[8*i+1];
+                t[2] = config.ETA - a.coeffs[8*i+2];
+                t[3] = config.ETA - a.coeffs[8*i+3];
+                t[4] = config.ETA - a.coeffs[8*i+4];
+                t[5] = config.ETA - a.coeffs[8*i+5];
+                t[6] = config.ETA - a.coeffs[8*i+6];
+                t[7] = config.ETA - a.coeffs[8*i+7];
 
-            r[3*i+0]  = (t[0] >> 0) | (t[1] << 3) | (t[2] << 6);
-            r[3*i+1]  = (t[2] >> 2) | (t[3] << 1) | (t[4] << 4) | (t[5] << 7);
-            r[3*i+2]  = (t[5] >> 1) | (t[6] << 2) | (t[7] << 5);
+                r[3*i+0]  = (t[0] >> 0) | (t[1] << 3) | (t[2] << 6);
+                r[3*i+1]  = (t[2] >> 2) | (t[3] << 1) | (t[4] << 4) | (t[5] << 7);
+                r[3*i+2]  = (t[5] >> 1) | (t[6] << 2) | (t[7] << 5);
+            }
+
         }
-#elif ETA == 4
-        for(i = 0; i < N/2; ++i) {
-            t[0] = ETA - a->coeffs[2*i+0];
-            t[1] = ETA - a->coeffs[2*i+1];
-            r[i] = t[0] | (t[1] << 4);
+  else if (config.ETA == 4)
+        {
+            for(i = 0; i < config.N/2; ++i) {
+                t[0] = config.ETA - a.coeffs[2*i+0];
+                t[1] = config.ETA - a.coeffs[2*i+1];
+                r[i] = t[0] | (t[1] << 4);
+            }
         }
-#endif
 
-        DBENCH_STOP(*tpack);
+
+        //DBENCH_STOP(*tpack);
     }
 
     /*************************************************
-     * Name:        polyeta_unpack
+     * Name:        polyconfig.ETA_unpack
      *
      * Description: Unpack polynomial with coefficients in [-ETA,ETA].
      *
      * Arguments:   - poly *r: pointer to output polynomial
      *              - const uint8_t *a: byte array with bit-packed polynomial
      **************************************************/
-    void polyeta_unpack(poly *r, const uint8_t *a) {
-        unsigned int i;
-        DBENCH_START();
+    void polyeta_unpack(int rIndex,poly r, int aIndex,int[] a) {
+        int i;
+        //DBENCH_START();
 
-#if ETA == 2
-        for(i = 0; i < N/8; ++i) {
-            r->coeffs[8*i+0] =  (a[3*i+0] >> 0) & 7;
-            r->coeffs[8*i+1] =  (a[3*i+0] >> 3) & 7;
-            r->coeffs[8*i+2] = ((a[3*i+0] >> 6) | (a[3*i+1] << 2)) & 7;
-            r->coeffs[8*i+3] =  (a[3*i+1] >> 1) & 7;
-            r->coeffs[8*i+4] =  (a[3*i+1] >> 4) & 7;
-            r->coeffs[8*i+5] = ((a[3*i+1] >> 7) | (a[3*i+2] << 1)) & 7;
-            r->coeffs[8*i+6] =  (a[3*i+2] >> 2) & 7;
-            r->coeffs[8*i+7] =  (a[3*i+2] >> 5) & 7;
+if (config.ETA == 2)
+{
 
-            r->coeffs[8*i+0] = ETA - r->coeffs[8*i+0];
-            r->coeffs[8*i+1] = ETA - r->coeffs[8*i+1];
-            r->coeffs[8*i+2] = ETA - r->coeffs[8*i+2];
-            r->coeffs[8*i+3] = ETA - r->coeffs[8*i+3];
-            r->coeffs[8*i+4] = ETA - r->coeffs[8*i+4];
-            r->coeffs[8*i+5] = ETA - r->coeffs[8*i+5];
-            r->coeffs[8*i+6] = ETA - r->coeffs[8*i+6];
-            r->coeffs[8*i+7] = ETA - r->coeffs[8*i+7];
+    for(i = 0; i < config.N/8; ++i) {
+        r.coeffs[8*i+0] =  (a[3*i+0] >> 0) & 7;
+        r.coeffs[8*i+1] =  (a[3*i+0] >> 3) & 7;
+        r.coeffs[8*i+2] = ((a[3*i+0] >> 6) | (a[3*i+1] << 2)) & 7;
+        r.coeffs[8*i+3] =  (a[3*i+1] >> 1) & 7;
+        r.coeffs[8*i+4] =  (a[3*i+1] >> 4) & 7;
+        r.coeffs[8*i+5] = ((a[3*i+1] >> 7) | (a[3*i+2] << 1)) & 7;
+        r.coeffs[8*i+6] =  (a[3*i+2] >> 2) & 7;
+        r.coeffs[8*i+7] =  (a[3*i+2] >> 5) & 7;
+
+        r.coeffs[8*i+0] = config.ETA - r.coeffs[8*i+0];
+        r.coeffs[8*i+1] = config.ETA - r.coeffs[8*i+1];
+        r.coeffs[8*i+2] = config.ETA - r.coeffs[8*i+2];
+        r.coeffs[8*i+3] = config.ETA - r.coeffs[8*i+3];
+        r.coeffs[8*i+4] = config.ETA - r.coeffs[8*i+4];
+        r.coeffs[8*i+5] = config.ETA - r.coeffs[8*i+5];
+        r.coeffs[8*i+6] = config.ETA - r.coeffs[8*i+6];
+        r.coeffs[8*i+7] = config.ETA - r.coeffs[8*i+7];
+    }
+
+}
+else if (config.ETA == 4)
+        {
+            for(i = 0; i < config.N/2; ++i) {
+                r.coeffs[2*i+0] = a[i] & 0x0F;
+                r.coeffs[2*i+1] = a[i] >> 4;
+                r.coeffs[2*i+0] = config.ETA - r.coeffs[2*i+0];
+                r.coeffs[2*i+1] = config.ETA - r.coeffs[2*i+1];
+            }
         }
-#elif ETA == 4
-        for(i = 0; i < N/2; ++i) {
-            r->coeffs[2*i+0] = a[i] & 0x0F;
-            r->coeffs[2*i+1] = a[i] >> 4;
-            r->coeffs[2*i+0] = ETA - r->coeffs[2*i+0];
-            r->coeffs[2*i+1] = ETA - r->coeffs[2*i+1];
-        }
-#endif
 
-        DBENCH_STOP(*tpack);
+        //DBENCH_STOP(*tpack);
     }
 
     /*************************************************
@@ -742,19 +772,19 @@ else if (config.ETA == 4)
      *                            POLYT1_PACKEDBYTES bytes
      *              - const poly *a: pointer to input polynomial
      **************************************************/
-    void polyt1_pack(uint8_t *r, const poly *a) {
-        unsigned int i;
-        DBENCH_START();
+    void polyt1_pack(int rIndex,int[] r, poly a, int aIndex) {
+        int i;
+        //DBENCH_START();
 
-        for(i = 0; i < N/4; ++i) {
-            r[5*i+0] = (a->coeffs[4*i+0] >> 0);
-            r[5*i+1] = (a->coeffs[4*i+0] >> 8) | (a->coeffs[4*i+1] << 2);
-            r[5*i+2] = (a->coeffs[4*i+1] >> 6) | (a->coeffs[4*i+2] << 4);
-            r[5*i+3] = (a->coeffs[4*i+2] >> 4) | (a->coeffs[4*i+3] << 6);
-            r[5*i+4] = (a->coeffs[4*i+3] >> 2);
+        for(i = 0; i < config.N/4; ++i) {
+            r[5*i+0] = (a.coeffs[4*i+0] >> 0);
+            r[5*i+1] = (a.coeffs[4*i+0] >> 8) | (a.coeffs[4*i+1] << 2);
+            r[5*i+2] = (a.coeffs[4*i+1] >> 6) | (a.coeffs[4*i+2] << 4);
+            r[5*i+3] = (a.coeffs[4*i+2] >> 4) | (a.coeffs[4*i+3] << 6);
+            r[5*i+4] = (a.coeffs[4*i+3] >> 2);
         }
 
-        DBENCH_STOP(*tpack);
+       // DBENCH_STOP(*tpack);
     }
 
     /*************************************************
@@ -766,9 +796,9 @@ else if (config.ETA == 4)
      * Arguments:   - poly *r: pointer to output polynomial
      *              - const uint8_t *a: byte array with bit-packed polynomial
      **************************************************/
-    void polyt1_unpack(poly *r, const uint8_t *a) {
+    void polyt1_unpack(poly r, const uint8_t *a) {
         unsigned int i;
-        DBENCH_START();
+        //DBENCH_START();
 
         for(i = 0; i < N/4; ++i) {
             r->coeffs[4*i+0] = ((a[5*i+0] >> 0) | ((uint32_t)a[5*i+1] << 8)) & 0x3FF;
@@ -777,7 +807,7 @@ else if (config.ETA == 4)
             r->coeffs[4*i+3] = ((a[5*i+3] >> 6) | ((uint32_t)a[5*i+4] << 2)) & 0x3FF;
         }
 
-        DBENCH_STOP(*tpack);
+       // DBENCH_STOP(*tpack);
     }
 
     /*************************************************
