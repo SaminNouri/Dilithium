@@ -3,16 +3,17 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.lang.Math;
 
-
 public class Fips202 {
 
 	static int NROUNDS = 24;
 	static BigInteger allOne64 = new BigInteger("18446744073709551615");
+	static BigInteger allOne32 = new BigInteger("4294967295");
 
 	static final int SHAKE128_RATE = 168;
 	static final int SHAKE256_RATE = 136;
 	static final int SHA3_256_RATE = 136;
 	static final int SHA3_512_RATE = 72;
+//    static BigInteger allOne64 = new BigInteger("18446744073709551615");
 
 	public static void main(String[] args) {
 
@@ -27,21 +28,18 @@ public class Fips202 {
 
 	/*
 	 * #include <stddef.h> #include <stdint.h> #include "fips202.h"
-	 * 
-	 * 
-	 * 
+	 *
+	 *
+	 *
 	 * #define NROUNDS 24 #define ROL(a, offset) ((a << offset) ^ (a >>
 	 * (64-offset)))
 	 */
 
-
 	static BigInteger ROL(BigInteger a, int offset) {
 		BigInteger temp1 = a.shiftLeft(offset);
+		temp1 = temp1.and(allOne64);
 		BigInteger temp2 = a.shiftRight(64 - offset);
-		BigInteger b1;
-		b1 = new BigInteger("2");
-		int exponent = 64;
-		return (temp1.xor(temp2)).and((b1.pow(exponent)).subtract(new BigInteger("1")));
+		return temp1.or(temp2);
 	}
 
 	/*************************************************
@@ -53,13 +51,15 @@ public class Fips202 {
 	 *
 	 * Returns the loaded 64-bit unsigned integer
 	 **************************************************/
-	//tested!
+	// tested!
 	static BigInteger load64(int[] x, int beginIndex) {
 		BigInteger r = new BigInteger("0");
 		BigInteger xx;
-		for (int i = beginIndex; i < beginIndex + 8; i++) {
-			xx = new BigInteger(String.valueOf(x[i]));
-			r = r.or(xx.shiftLeft(8 * i));
+		for (int i = 0; i < 8; i++) {
+			xx = new BigInteger(String.valueOf(x[beginIndex + i]));
+			xx = xx.shiftLeft(8 * i);
+			xx = xx.and(allOne64);
+			r = r.or(xx);
 		}
 		return r;
 	}
@@ -78,10 +78,10 @@ public class Fips202 {
 
 	// Tested!
 	static void store64(int[] x, int beginIndex, BigInteger u) {
-		for (int i = beginIndex; i < beginIndex + 8; i++) {
-			BigInteger temp = u.shiftRight(8 * (i-beginIndex));
+		for (int i = 0; i < 8; i++) {
+			BigInteger temp = u.shiftRight(8 * i);
 			temp = temp.and(new BigInteger("255"));
-			x[i] = temp.intValue();
+			x[beginIndex + i] = temp.intValue();
 		}
 	}
 
@@ -120,7 +120,7 @@ public class Fips202 {
 	 * BigInteger("0x000000000000800AL"), new BigInteger("0x800000008000000AL"), new
 	 * BigInteger("0x8000000080008081L"), new BigInteger("0x8000000000008080L"), new
 	 * BigInteger("0x0000000080000001L"), new BigInteger("0x8000000080008008L") };
-	 * 
+	 *
 	 */
 
 	/*************************************************
@@ -146,18 +146,17 @@ public class Fips202 {
 		BigInteger Ema, Eme, Emi, Emo, Emu;
 		BigInteger Esa, Ese, Esi, Eso, Esu;
 
-
-		//copyFromState(A, state)
-		Aba = state[ 0];
-		Abe = state[ 1];
-		Abi = state[ 2];
-		Abo = state[ 3];
-		Abu = state[ 4];
-		Aga = state[ 5];
-		Age = state[ 6];
-		Agi = state[ 7];
-		Ago = state[ 8];
-		Agu = state[ 9];
+		// copyFromState(A, state)
+		Aba = state[0];
+		Abe = state[1];
+		Abi = state[2];
+		Abo = state[3];
+		Abu = state[4];
+		Aga = state[5];
+		Age = state[6];
+		Agi = state[7];
+		Ago = state[8];
+		Agu = state[9];
 		Aka = state[10];
 		Ake = state[11];
 		Aki = state[12];
@@ -427,7 +426,7 @@ public class Fips202 {
 	 *
 	 * Arguments: - keccak_state *state: pointer to (uninitialized) Keccak state
 	 **************************************************/
-	static void shake128_init(KeccakState state) {
+	void shake128_init(KeccakState state) {
 		state.keccakInit();
 		state.pos = 0;
 	}
@@ -441,9 +440,9 @@ public class Fips202 {
 	 * state - const byte *in: pointer to input to be absorbed into s - long inlen:
 	 * length of input in bytes
 	 **************************************************/
-	/*void shake128_absorb(KeccakState state, byte[] in, long inlen) {
-		state.pos = state.keccak_absorb(state.s, state.pos, SHAKE128_RATE, in, inlen);
-	}*/
+	void shake128_absorb(KeccakState state, int[] in, long inlen) {
+		state.pos = state.keccak_absorb(state.s, state.pos, SHAKE128_RATE, 0, in, inlen);
+	}
 
 	/*************************************************
 	 * Name: shake128_finalize
@@ -523,9 +522,9 @@ public class Fips202 {
 	 * state - const byte *in: pointer to input to be absorbed into s - long inlen:
 	 * length of input in bytes
 	 **************************************************/
-/*	void shake256_absorb(KeccakState state, byte[] in, long inlen) {
-		state.pos = keccak_absorb(state.s, state.pos, SHAKE256_RATE, in, inlen);
-	}*/
+	static void shake256_absorb(KeccakState state,int inIndex, int[] in, long inlen) {
+		state.pos = state.keccak_absorb(state.s, state.pos, SHAKE256_RATE, inIndex, in, inlen);
+	}
 
 	/*************************************************
 	 * Name: shake256_finalize
@@ -534,7 +533,7 @@ public class Fips202 {
 	 *
 	 * Arguments: - keccak_state *state: pointer to Keccak state
 	 **************************************************/
-	void shake256_finalize(KeccakState state) {
+	static void shake256_finalize(KeccakState state) {
 		state.keccak_finalize(state.s, state.pos, SHAKE256_RATE, (byte) 0x1F);
 		state.pos = SHAKE256_RATE;
 	}
@@ -549,8 +548,8 @@ public class Fips202 {
 	 * bytes to be squeezed (written to output) - keccak_state *s: pointer to
 	 * input/output Keccak state
 	 **************************************************/
-	void shake256_squeeze(int[] out,int outindex, long outlen, KeccakState state) {
-		state.pos = state.keccak_squeeze(out,outindex, outlen,SHAKE256_RATE);
+	void shake256_squeeze(int[] out, int outindex, long outlen, KeccakState state) {
+		state.pos = state.keccak_squeeze(out, outindex, outlen, SHAKE256_RATE);
 	}
 
 	/*************************************************
@@ -580,7 +579,7 @@ public class Fips202 {
 	 * input/output Keccak state
 	 **************************************************/
 	static void shake256_squeezeblocks(int[] out, int outindex, long nblocks, KeccakState state) {
-		state.keccak_squeezeblocks(out,outindex, nblocks, SHAKE256_RATE);
+		state.keccak_squeezeblocks(out, outindex, nblocks, SHAKE256_RATE);
 	}
 
 	/*************************************************
@@ -592,7 +591,7 @@ public class Fips202 {
 	 * length in bytes - const byte *in: pointer to input - long inlen: length of
 	 * input in bytes
 	 **************************************************/
-	/*void shake128(int[] out, int beginIndex, int outlen, byte[] in, int inlen) {
+	void shake128(int[] out, int beginIndex, long outlen, int[] in, long inlen) {
 		long nblocks;
 		KeccakState state = new KeccakState();
 		shake128_absorb_once(state, in, inlen);
@@ -601,7 +600,7 @@ public class Fips202 {
 		outlen -= nblocks * SHAKE128_RATE;
 		beginIndex += nblocks * SHAKE128_RATE;
 		shake128_squeeze(out, beginIndex, outlen, state);
-	}*/
+	}
 
 	/*************************************************
 	 * Name: shake256
@@ -612,16 +611,17 @@ public class Fips202 {
 	 * length in bytes - const byte *in: pointer to input - long inlen: length of
 	 * input in bytes
 	 **************************************************/
-/*	void shake256(byte[] out, long outlen, byte[] in, long inlen) {
+	void shake256(int[] out, long outlen, int[] in, long inlen) {
 		long nblocks;
+		int out_Index = 0;
 		KeccakState state = new KeccakState();
 		shake256_absorb_once(state, in, inlen);
 		nblocks = outlen / SHAKE256_RATE;
-		shake256_squeezeblocks(out, nblocks, state);
+		shake256_squeezeblocks(out, out_Index, nblocks, state);
 		outlen -= nblocks * SHAKE256_RATE;
-		out += nblocks * SHAKE256_RATE;
-		shake256_squeeze(out, outlen, state);
-	}*/
+		out_Index += nblocks * SHAKE256_RATE;
+		shake256_squeeze(out, out_Index, outlen, state);
+	}
 
 	/*************************************************
 	 * Name: sha3_256
@@ -631,15 +631,16 @@ public class Fips202 {
 	 * Arguments: - byte *h: pointer to output (32 bytes) - const byte *in: pointer
 	 * to input - long inlen: length of input in bytes
 	 **************************************************/
-	/*void sha3_256(byte[] h, byte[] in, long inlen) {
-		BigInteger[] s = new BigInteger[25];
-		keccak_absorb_once(s, SHA3_256_RATE, in, inlen, (byte) 0x06);
-		KeccakF1600_StatePermute(s);
+	void sha3_256(int[] h, int[] in, long inlen) {
+		KeccakState state = new KeccakState();
+		state.keccakInit();
+		state.keccak_absorb_once(SHA3_256_RATE, in, inlen, (byte) 0x06);
+		KeccakF1600_StatePermute(state.s);
 		int hIndex = 0;
 		for (int i = 0; i < 4; i++)
-			store64(h, hIndex + 8 * i, s[i]);
+			store64(h, hIndex + 8 * i, state.s[i]);
 	}
-*/
+
 	/*************************************************
 	 * Name: sha3_512
 	 *
@@ -648,18 +649,19 @@ public class Fips202 {
 	 * Arguments: - byte *h: pointer to output (64 bytes) - const byte *in: pointer
 	 * to input - long inlen: length of input in bytes
 	 **************************************************/
-	/*void sha3_512(byte[] h, byte[] in, long inlen) {
-		BigInteger[] s = new BigInteger[25];
-		keccak_absorb_once(s, SHA3_512_RATE, in, inlen, (byte) 0x06);
-		KeccakF1600_StatePermute(s);
+	void sha3_512(int[] h, int[] in, long inlen) {
+		KeccakState state = new KeccakState();
+		state.keccakInit();
+		state.keccak_absorb_once(SHA3_512_RATE, in, inlen, (byte) 0x06);
+		KeccakF1600_StatePermute(state.s);
 		int hIndex = 0;
 		for (int i = 0; i < 8; i++)
-			store64(h, hIndex + 8 * i, s[i]);
-	}*/
+			store64(h, hIndex + 8 * i, state.s[i]);
+	}
 
 }
 
 //TODO what if we pass state.pos to a function and it changes the value of pos
 // TODO does it change in C? when we pass state->pos to the function
-// TODO we should always pass index and the reference to 
+// TODO we should always pass index and the reference to
 // the array 'in' and 'out' functions

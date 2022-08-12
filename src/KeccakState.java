@@ -19,15 +19,63 @@ public class KeccakState {
 			s[i] = new BigInteger("0");
 	}
 
-	/*
-	 * int keccak_absorb(int pos, long r, int[] in, long inlen) { int inIndex = 0;
-	 * while (pos + inlen >= r) { for (int i = pos; i < r; i++) { BigInteger temp =
-	 * new BigInteger(Byte.toString(in[inIndex++])); temp = temp.shiftLeft(8 * (i %
-	 * 8)); s[i / 8] = s[i / 8].xor(temp); } inlen -= r - pos;
-	 * KeccakF1600_StatePermute(s); pos = 0; } int i; for (i = pos; i < pos + inlen;
-	 * i++) { BigInteger temp = new BigInteger(Byte.toString(in[inIndex++])); temp =
-	 * temp.shiftLeft(8 * (i % 8)); s[i / 8] = s[i / 8].xor(temp); } return i; }
-	 */
+
+
+
+	/*************************************************
+	 * Name:        keccak_absorb
+	 *
+	 * Description: Absorb step of Keccak; incremental.
+	 *
+	 * Arguments:   - uint64_t *s: pointer to Keccak state
+	 *              - unsigned int pos: position in current block to be absorbed
+	 *              - unsigned int r: rate in bytes (e.g., 168 for SHAKE128)
+	 *              - const uint8_t *in: pointer to input to be absorbed into s
+	 *              - size_t inlen: length of input in bytes
+	 *
+	 * Returns new position pos in current block
+	 **************************************************/
+	static int keccak_absorb(BigInteger[] s,
+							 int pos,
+							 int r,
+							 int in_Index,
+							 int[] in,
+							 long inlen)
+	{
+		int i;
+
+		while(pos+inlen >= r) {
+			for(i=pos;i<r;i++) {
+				BigInteger temp = new BigInteger(Integer.toString(in[in_Index++]));
+				temp = temp.and(Fips202.allOne64);
+				temp = temp.shiftLeft(8 * (i % 8));
+				temp = temp.and(Fips202.allOne64);
+				s[i / 8] = s[i / 8].xor(temp);
+//	    	s[i/8] ^= (uint64_t) * in++ << 8*(i%8);
+			}
+
+
+			inlen -= r-pos;
+			Fips202.KeccakF1600_StatePermute(s);
+			pos = 0;
+		}
+
+		for(i=pos;i<pos+inlen;i++) {
+			BigInteger temp = new BigInteger(Integer.toString(in[in_Index++]));
+			temp = temp.and(Fips202.allOne64);
+			temp = temp.shiftLeft(8 * (i % 8));
+			temp = temp.and(Fips202.allOne64);
+			s[i / 8] = s[i / 8].xor(temp);
+
+//		  s[i/8] ^= (uint64_t)*in++ << 8*(i%8);
+		}
+
+
+
+		return i;
+	}
+
+
 	/*************************************************
 	 * Name: keccak_finalize
 	 *
@@ -38,14 +86,15 @@ public class KeccakState {
 	 * (e.g., 168 for SHAKE128) - byte p: domain separation byte
 	 **************************************************/
 
-	// TODO 1ULL doesn't work like this
 	// doesn't create a valid BigInteger
-	static void keccak_finalize(BigInteger[] s, int pos, int r, byte p) {
-		BigInteger temp = new BigInteger(Byte.toString(p));
+	static void keccak_finalize(BigInteger[] s, int pos, int r, int p) {
+		BigInteger temp = new BigInteger(Integer.toString(p));
 		temp = temp.shiftLeft(8 * (pos % 8));
+		temp = temp.and(Fips202.allOne64);
 		s[(pos / 8)] = s[(pos / 8)].xor(temp);
 		temp = new BigInteger("1");
 		temp = temp.shiftLeft(63);
+		temp = temp.and(Fips202.allOne64);
 		s[(r / 8) - 1] = s[(r / 8) - 1].xor(temp);
 	}
 
@@ -65,6 +114,8 @@ public class KeccakState {
 	 *************************************************
 	 * @return*/
 
+
+	// TODO
 	int keccak_squeeze(int[] out, int beginIndex, long outlen, int r) {
 		int i;
 		while (outlen > 0) {
@@ -72,8 +123,11 @@ public class KeccakState {
 				Fips202.KeccakF1600_StatePermute(s);
 				pos = 0;
 			}
-			for (i = pos; i < r && i < pos + outlen; i++)
-				out[beginIndex++] = (s[i / 8].shiftRight(8 * (i % 8)).and(new BigInteger("255"))).intValue();
+			for (i = pos; i < r && i < pos + outlen; i++) {
+				BigInteger temp = s[i / 8].shiftRight(8 * (i % 8));
+				temp = temp.and(new BigInteger("255"));
+				out[beginIndex++] = temp.intValue();
+			}
 			outlen -= (i - pos);
 			pos = i;
 		}
@@ -107,13 +161,16 @@ public class KeccakState {
 		for (i = 0; i < inlen; i++) {
 			BigInteger temp = new BigInteger(Integer.toString(in[i]));
 			temp = temp.shiftLeft(8 * (i % 8));
+			temp = temp.and(Fips202.allOne64);
 			s[i / 8] = s[i / 8].xor(temp);
 		}
 		BigInteger temp = new BigInteger(Integer.toString(p));
 		temp = temp.shiftLeft(8 * (i % 8));
+		temp = temp.and(Fips202.allOne64);
 		s[i / 8] = s[i / 8].xor(temp);
 		temp = new BigInteger("1");
 		temp = temp.shiftLeft(63);
+		temp = temp.and(Fips202.allOne64);
 		s[(r - 1) / 8] = s[(r - 1) / 8].xor(temp);
 
 	}

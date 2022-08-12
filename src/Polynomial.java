@@ -607,16 +607,17 @@ else if (config.ETA == 4)
      **************************************************/
 
 
-    void poly_challenge(poly *c, const uint8_t seed[SEEDBYTES]) {
-        unsigned int i, b, pos;
-        uint64_t signs;
-        uint8_t buf[SHAKE256_RATE];
-        keccak_state state;
+    void poly_challenge(int cIdex, poly c,int seedIndex, int[] seed) {
+        int i, b, pos;
+        BigInteger signs;
+        int[] buf=new int[config.SHAKE256_RATE];
+        int buIndex=0;
+        KeccakState state=new KeccakState();
 
-        shake256_init(&state);
-        shake256_absorb(&state, seed, SEEDBYTES);
-        shake256_finalize(&state);
-        shake256_squeezeblocks(buf, 1, &state);
+        Fips202.shake256_init(state);
+        Fips202.shake256_absorb(state,seedIndex, seed, config.SEEDBYTES);
+        Fips202.shake256_finalize(state);
+        Fips202.shake256_squeezeblocks(buf,buIndex, 1, state);
 
         signs = 0;
         for(i = 0; i < 8; ++i)
