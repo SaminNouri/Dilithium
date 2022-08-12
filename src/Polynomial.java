@@ -605,6 +605,8 @@ else if (config.ETA == 4)
      * Arguments:   - poly *c: pointer to output polynomial
      *              - const uint8_t mu[]: byte array containing seed of length SEEDBYTES
      **************************************************/
+
+
     void poly_challenge(poly *c, const uint8_t seed[SEEDBYTES]) {
         unsigned int i, b, pos;
         uint64_t signs;
