@@ -14,6 +14,8 @@ public class Polynomial {
 
     static BigInteger allOne32=new BigInteger("4294967295");
 
+    static BigInteger allOne64 = new BigInteger("18446744073709551615");
+
     static int allOne16=65535;
 
 
@@ -619,25 +621,28 @@ else if (config.ETA == 4)
         Fips202.shake256_finalize(state);
         Fips202.shake256_squeezeblocks(buf,buIndex, 1, state);
 
-        signs = 0;
+        signs = new BigInteger("0");
         for(i = 0; i < 8; ++i)
-            signs |= (uint64_t)buf[i] << 8*i;
+        {
+            signs=signs.or((new BigInteger(Integer.toString((buf[i] & 255) )).shiftLeft(8*i)).and(allOne64));
+            signs=signs.and(allOne64);
+        }
         pos = 8;
 
-        for(i = 0; i < N; ++i)
-            c->coeffs[i] = 0;
-        for(i = N-TAU; i < N; ++i) {
+        for(i = 0; i < config.N; ++i)
+            c.coeffs[i+cIdex] = 0;
+        for(i = config.N-config.TAU; i < config.N; ++i) {
             do {
-                if(pos >= SHAKE256_RATE) {
-                    shake256_squeezeblocks(buf, 1, &state);
+                if(pos >= config.SHAKE256_RATE) {
+                    Fips202.shake256_squeezeblocks(buf,buIndex, 1, state);
                     pos = 0;
                 }
 
                 b = buf[pos++];
             } while(b > i);
 
-            c->coeffs[i] = c->coeffs[b];
-            c->coeffs[b] = 1 - 2*(signs & 1);
+            c.coeffs[i+cIdex] = c.coeffs[b+cIdex];
+            c.coeffs[b+cIdex] = 1 - 2*(signs & 1);
             signs >>= 1;
         }
     }

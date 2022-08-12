@@ -426,7 +426,7 @@ public class Fips202 {
 	 *
 	 * Arguments: - keccak_state *state: pointer to (uninitialized) Keccak state
 	 **************************************************/
-	void shake128_init(KeccakState state) {
+	static void shake128_init(KeccakState state) {
 		state.keccakInit();
 		state.pos = 0;
 	}
