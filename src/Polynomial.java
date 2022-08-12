@@ -644,6 +644,7 @@ else if (config.ETA == 4)
             c.coeffs[i+cIdex] = c.coeffs[b+cIdex];
             c.coeffs[b+cIdex] = 1 - 2*(signs & 1);
             signs >>= 1;
+            helkrngont4olntb
         }
     }
 
