@@ -668,7 +668,7 @@ public static int POLY_UNIFORM_GAMMA1_NBLOCKS= ((config.POLYZ_PACKEDBYTES + conf
         }
     }
 
-    //correct shift!
+
 
     /*************************************************
      * Name:        polyeta_pack
@@ -683,6 +683,8 @@ public static int POLY_UNIFORM_GAMMA1_NBLOCKS= ((config.POLYZ_PACKEDBYTES + conf
         int i;
         int[] t=new int[8];
         //DBENCH_START();
+
+
 
 if (config.ETA == 2)
         {
@@ -741,14 +743,14 @@ if (config.ETA == 2)
         r.coeffs[8*i+6] =  (a[3*i+2] >> 2) & 7;
         r.coeffs[8*i+7] =  (a[3*i+2] >> 5) & 7;
 
-        r.coeffs[8*i+0] = config.ETA - r.coeffs[8*i+0]);
-        r.coeffs[8*i+1] = config.ETA - r.coeffs[8*i+1]);
-        r.coeffs[8*i+2] = config.ETA - r.coeffs[8*i+2]);
-        r.coeffs[8*i+3] = config.ETA - r.coeffs[8*i+3]);
-        r.coeffs[8*i+4] = config.ETA - r.coeffs[8*i+4]);
-        r.coeffs[8*i+5] = config.ETA - r.coeffs[8*i+5]);
-        r.coeffs[8*i+6] = config.ETA - r.coeffs[8*i+6]);
-        r.coeffs[8*i+7] = config.ETA - r.coeffs[8*i+7]);
+        r.coeffs[8*i+0] = config.ETA - r.coeffs[8*i+0];
+        r.coeffs[8*i+1] = config.ETA - r.coeffs[8*i+1];
+        r.coeffs[8*i+2] = config.ETA - r.coeffs[8*i+2];
+        r.coeffs[8*i+3] = config.ETA - r.coeffs[8*i+3];
+        r.coeffs[8*i+4] = config.ETA - r.coeffs[8*i+4];
+        r.coeffs[8*i+5] = config.ETA - r.coeffs[8*i+5];
+        r.coeffs[8*i+6] = config.ETA - r.coeffs[8*i+6];
+        r.coeffs[8*i+7] = config.ETA - r.coeffs[8*i+7];
     }
 
 }
@@ -780,11 +782,11 @@ else if (config.ETA == 4)
         //DBENCH_START();
 
         for(i = 0; i < config.N/4; ++i) {
-            r[5*i+0] = (a.coeffs[4*i+0] >> 0);
-            r[5*i+1] = (a.coeffs[4*i+0] >> 8) | (a.coeffs[4*i+1] << 2);
-            r[5*i+2] = (a.coeffs[4*i+1] >> 6) | (a.coeffs[4*i+2] << 4);
-            r[5*i+3] = (a.coeffs[4*i+2] >> 4) | (a.coeffs[4*i+3] << 6);
-            r[5*i+4] = (a.coeffs[4*i+3] >> 2);
+            r[5*i+0] = (a.coeffs[4*i+0] >> 0)&255;
+            r[5*i+1] = ((a.coeffs[4*i+0] >> 8)&255) | ((a.coeffs[4*i+1] << 2)&255);
+            r[5*i+2] = ((a.coeffs[4*i+1] >> 6)&255)| ((a.coeffs[4*i+2] << 4)&255);
+            r[5*i+3] =( (a.coeffs[4*i+2] >> 4) &255)| ((a.coeffs[4*i+3] << 6)&255);
+            r[5*i+4] = (a.coeffs[4*i+3] >> 2)&255;
         }
 
        // DBENCH_STOP(*tpack);
@@ -804,10 +806,10 @@ else if (config.ETA == 4)
         //DBENCH_START();
 
         for(i = 0; i < config.N/4; ++i) {
-            r.coeffs[4*i+0] = ((a[5*i+0] >> 0) | ((uint32_t)a[5*i+1] << 8)) & 0x3FF;
-            r.coeffs[4*i+1] = ((a[5*i+1] >> 2) | ((uint32_t)a[5*i+2] << 6)) & 0x3FF;
-            r.coeffs[4*i+2] = ((a[5*i+2] >> 4) | ((uint32_t)a[5*i+3] << 4)) & 0x3FF;
-            r.coeffs[4*i+3] = ((a[5*i+3] >> 6) | ((uint32_t)a[5*i+4] << 2)) & 0x3FF;
+            r.coeffs[4*i+0] = (int) (((a[5*i+0] >> 0) | (new Long(a[5*i+1]) << 8)) & 0x3FF);
+            r.coeffs[4*i+1] = (int) (((a[5*i+1] >> 2) | (new Long(a[5*i+2]) << 6)) & 0x3FF);
+            r.coeffs[4*i+2] = (int) (((a[5*i+2] >> 4) | (new Long(a[5*i+3]) << 4)) & 0x3FF);
+            r.coeffs[4*i+3] = (int) (((a[5*i+3] >> 6) | (new Long(a[5*i+4]) << 2)) & 0x3FF);
         }
 
        // DBENCH_STOP(*tpack);
@@ -822,44 +824,45 @@ else if (config.ETA == 4)
      *                            POLYT0_PACKEDBYTES bytes
      *              - const poly *a: pointer to input polynomial
      **************************************************/
-    void polyt0_pack(uint8_t *r, const poly *a) {
-        unsigned int i;
-        uint32_t t[8];
-        DBENCH_START();
+    void polyt0_pack(int[] r,int aIndex, poly a) {
+        int i;
+        Long[] t=new Long[8];
+        Long allOne32=this.allOne32.longValue();
+        //DBENCH_START();
 
-        for(i = 0; i < N/8; ++i) {
-            t[0] = (1 << (D-1)) - a->coeffs[8*i+0];
-            t[1] = (1 << (D-1)) - a->coeffs[8*i+1];
-            t[2] = (1 << (D-1)) - a->coeffs[8*i+2];
-            t[3] = (1 << (D-1)) - a->coeffs[8*i+3];
-            t[4] = (1 << (D-1)) - a->coeffs[8*i+4];
-            t[5] = (1 << (D-1)) - a->coeffs[8*i+5];
-            t[6] = (1 << (D-1)) - a->coeffs[8*i+6];
-            t[7] = (1 << (D-1)) - a->coeffs[8*i+7];
+        for(i = 0; i < config.N/8; ++i) {
+            t[0] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+0]);
+            t[1] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+1]);
+            t[2] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+2]);
+            t[3] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+3]);
+            t[4] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+4]);
+            t[5] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+5]);
+            t[6] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+6]);
+            t[7] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+7]);
 
-            r[13*i+ 0]  =  t[0];
-            r[13*i+ 1]  =  t[0] >>  8;
-            r[13*i+ 1] |=  t[1] <<  5;
-            r[13*i+ 2]  =  t[1] >>  3;
-            r[13*i+ 3]  =  t[1] >> 11;
-            r[13*i+ 3] |=  t[2] <<  2;
-            r[13*i+ 4]  =  t[2] >>  6;
-            r[13*i+ 4] |=  t[3] <<  7;
-            r[13*i+ 5]  =  t[3] >>  1;
-            r[13*i+ 6]  =  t[3] >>  9;
-            r[13*i+ 6] |=  t[4] <<  4;
-            r[13*i+ 7]  =  t[4] >>  4;
-            r[13*i+ 8]  =  t[4] >> 12;
-            r[13*i+ 8] |=  t[5] <<  1;
-            r[13*i+ 9]  =  t[5] >>  7;
-            r[13*i+ 9] |=  t[6] <<  6;
-            r[13*i+10]  =  t[6] >>  2;
-            r[13*i+11]  =  t[6] >> 10;
-            r[13*i+11] |=  t[7] <<  3;
-            r[13*i+12]  =  t[7] >>  5;
+            r[13*i+ 0]  = (int) (255&(  t[0]));
+            r[13*i+ 1]  = (int) (255&(  t[0] >>  8));
+            r[13*i+ 1] |=255&(  t[1] <<  5);
+            r[13*i+ 2]  = (int) (255&(  t[1] >>  3));
+            r[13*i+ 3]  = (int) (255&(  t[1] >> 11));
+            r[13*i+ 3] |=255&(  t[2] <<  2);
+            r[13*i+ 4]  = (int) (255&(  t[2] >>  6));
+            r[13*i+ 4] |=255&(  t[3] <<  7);
+            r[13*i+ 5]  = (int) (255&(  t[3] >>  1));
+            r[13*i+ 6]  = (int) (255&(  t[3] >>  9));
+            r[13*i+ 6] |=255&(  t[4] <<  4);
+            r[13*i+ 7]  = (int) (255&(  t[4] >>  4));
+            r[13*i+ 8]  = (int) (255&(  t[4] >> 12));
+            r[13*i+ 8] |=255&(  t[5] <<  1);
+            r[13*i+ 9]  = (int) (255&(  t[5] >>  7));
+            r[13*i+ 9] |=255&(  t[6] <<  6);
+            r[13*i+10]  = (int) (255&(  t[6] >>  2));
+            r[13*i+11]  = (int) (255&(  t[6] >> 10));
+            r[13*i+11] |=255&(  t[7] <<  3);
+            r[13*i+12]  = (int) (255&(  t[7] >>  5));
         }
 
-        DBENCH_STOP(*tpack);
+        //DBENCH_STOP(*tpack);
     }
 
     /*************************************************
@@ -870,58 +873,58 @@ else if (config.ETA == 4)
      * Arguments:   - poly *r: pointer to output polynomial
      *              - const uint8_t *a: byte array with bit-packed polynomial
      **************************************************/
-    void polyt0_unpack(poly *r, const uint8_t *a) {
-        unsigned int i;
-        DBENCH_START();
+    void polyt0_unpack(int rIndex,poly r,int aIndex, int[] a) {
+        int i;
+        //DBENCH_START();
 
-        for(i = 0; i < N/8; ++i) {
-            r->coeffs[8*i+0]  = a[13*i+0];
-            r->coeffs[8*i+0] |= (uint32_t)a[13*i+1] << 8;
-            r->coeffs[8*i+0] &= 0x1FFF;
+        for(i = 0; i < config.N/8; ++i) {
+            r.coeffs[rIndex+8*i+0]  = a[13*i+0];
+            r.coeffs[rIndex+8*i+0] |= new Long(a[13*i+1]) << 8;
+            r.coeffs[rIndex+8*i+0] &= 0x1FFF;
 
-            r->coeffs[8*i+1]  = a[13*i+1] >> 5;
-            r->coeffs[8*i+1] |= (uint32_t)a[13*i+2] << 3;
-            r->coeffs[8*i+1] |= (uint32_t)a[13*i+3] << 11;
-            r->coeffs[8*i+1] &= 0x1FFF;
+            r.coeffs[rIndex+8*i+1]  = a[13*i+1] >> 5;
+            r.coeffs[rIndex+8*i+1] |= new Long(a[13*i+2]) << 3;
+            r.coeffs[rIndex+8*i+1] |= new Long(a[13*i+3]) << 11;
+            r.coeffs[rIndex+8*i+1] &= 0x1FFF;
 
-            r->coeffs[8*i+2]  = a[13*i+3] >> 2;
-            r->coeffs[8*i+2] |= (uint32_t)a[13*i+4] << 6;
-            r->coeffs[8*i+2] &= 0x1FFF;
+            r.coeffs[rIndex+8*i+2]  = a[13*i+3] >> 2;
+            r.coeffs[rIndex+8*i+2] |= new Long(a[13*i+4] )<< 6;
+            r.coeffs[rIndex+8*i+2] &= 0x1FFF;
 
-            r->coeffs[8*i+3]  = a[13*i+4] >> 7;
-            r->coeffs[8*i+3] |= (uint32_t)a[13*i+5] << 1;
-            r->coeffs[8*i+3] |= (uint32_t)a[13*i+6] << 9;
-            r->coeffs[8*i+3] &= 0x1FFF;
+            r.coeffs[rIndex+8*i+3]  = a[13*i+4] >> 7;
+            r.coeffs[rIndex+8*i+3] |= new Long(a[13*i+5])<< 1;
+            r.coeffs[rIndex+8*i+3] |= new Long(a[13*i+6]) << 9;
+            r.coeffs[rIndex+8*i+3] &= 0x1FFF;
 
-            r->coeffs[8*i+4]  = a[13*i+6] >> 4;
-            r->coeffs[8*i+4] |= (uint32_t)a[13*i+7] << 4;
-            r->coeffs[8*i+4] |= (uint32_t)a[13*i+8] << 12;
-            r->coeffs[8*i+4] &= 0x1FFF;
+            r.coeffs[rIndex+8*i+4]  = a[13*i+6] >> 4;
+            r.coeffs[rIndex+8*i+4] |= new Long(a[13*i+7]) << 4;
+            r.coeffs[rIndex+8*i+4] |= new Long(a[13*i+8]) << 12;
+            r.coeffs[rIndex+8*i+4] &= 0x1FFF;
 
-            r->coeffs[8*i+5]  = a[13*i+8] >> 1;
-            r->coeffs[8*i+5] |= (uint32_t)a[13*i+9] << 7;
-            r->coeffs[8*i+5] &= 0x1FFF;
+            r.coeffs[rIndex+8*i+5]  = a[13*i+8] >> 1;
+            r.coeffs[rIndex+8*i+5] |= new Long(a[13*i+9]) << 7;
+            r.coeffs[rIndex+8*i+5] &= 0x1FFF;
 
-            r->coeffs[8*i+6]  = a[13*i+9] >> 6;
-            r->coeffs[8*i+6] |= (uint32_t)a[13*i+10] << 2;
-            r->coeffs[8*i+6] |= (uint32_t)a[13*i+11] << 10;
-            r->coeffs[8*i+6] &= 0x1FFF;
+            r.coeffs[rIndex+8*i+6]  = a[13*i+9] >> 6;
+            r.coeffs[rIndex+8*i+6] |= new Long(a[13*i+10]) << 2;
+            r.coeffs[rIndex+8*i+6] |= new Long(a[13*i+11]) << 10;
+            r.coeffs[rIndex+8*i+6] &= 0x1FFF;
 
-            r->coeffs[8*i+7]  = a[13*i+11] >> 3;
-            r->coeffs[8*i+7] |= (uint32_t)a[13*i+12] << 5;
-            r->coeffs[8*i+7] &= 0x1FFF;
+            r.coeffs[rIndex+8*i+7]  = a[13*i+11] >> 3;
+            r.coeffs[rIndex+8*i+7] |= new Long(a[13*i+12]) << 5;
+            r.coeffs[rIndex+8*i+7] &= 0x1FFF;
 
-            r->coeffs[8*i+0] = (1 << (D-1)) - r->coeffs[8*i+0];
-            r->coeffs[8*i+1] = (1 << (D-1)) - r->coeffs[8*i+1];
-            r->coeffs[8*i+2] = (1 << (D-1)) - r->coeffs[8*i+2];
-            r->coeffs[8*i+3] = (1 << (D-1)) - r->coeffs[8*i+3];
-            r->coeffs[8*i+4] = (1 << (D-1)) - r->coeffs[8*i+4];
-            r->coeffs[8*i+5] = (1 << (D-1)) - r->coeffs[8*i+5];
-            r->coeffs[8*i+6] = (1 << (D-1)) - r->coeffs[8*i+6];
-            r->coeffs[8*i+7] = (1 << (D-1)) - r->coeffs[8*i+7];
+            r.coeffs[rIndex+8*i+0] = (1 << (config.D-1)) - r.coeffs[rIndex+8*i+0];
+            r.coeffs[rIndex+8*i+1] = (1 << (config.D-1)) - r.coeffs[rIndex+8*i+1];
+            r.coeffs[rIndex+8*i+2] = (1 << (config.D-1)) - r.coeffs[rIndex+8*i+2];
+            r.coeffs[rIndex+8*i+3] = (1 << (config.D-1)) - r.coeffs[rIndex+8*i+3];
+            r.coeffs[rIndex+8*i+4] = (1 << (config.D-1)) - r.coeffs[rIndex+8*i+4];
+            r.coeffs[rIndex+8*i+5] = (1 << (config.D-1)) - r.coeffs[rIndex+8*i+5];
+            r.coeffs[rIndex+8*i+6] = (1 << (config.D-1)) - r.coeffs[rIndex+8*i+6];
+            r.coeffs[rIndex+8*i+7] = (1 << (config.D-1)) - r.coeffs[rIndex+8*i+7];
         }
 
-        DBENCH_STOP(*tpack);
+        //DBENCH_STOP(*tpack);
     }
 
     /*************************************************
@@ -934,46 +937,57 @@ else if (config.ETA == 4)
      *                            POLYZ_PACKEDBYTES bytes
      *              - const poly *a: pointer to input polynomial
      **************************************************/
-    void polyz_pack(uint8_t *r, const poly *a) {
-        unsigned int i;
-        uint32_t t[4];
-        DBENCH_START();
+    void polyz_pack(int rIndex,int[] r, int aIndex,poly a) {
+         int i;
+        int[]  t=new int[4];
+        int allOne32=this.allOne32.intValue();
+        //DBENCH_START();
 
-#if GAMMA1 == (1 << 17)
-        for(i = 0; i < N/4; ++i) {
-            t[0] = GAMMA1 - a->coeffs[4*i+0];
-            t[1] = GAMMA1 - a->coeffs[4*i+1];
-            t[2] = GAMMA1 - a->coeffs[4*i+2];
-            t[3] = GAMMA1 - a->coeffs[4*i+3];
+if (config.GAMMA1 == (1 << 17))
+        {
 
-            r[9*i+0]  = t[0];
-            r[9*i+1]  = t[0] >> 8;
-            r[9*i+2]  = t[0] >> 16;
-            r[9*i+2] |= t[1] << 2;
-            r[9*i+3]  = t[1] >> 6;
-            r[9*i+4]  = t[1] >> 14;
-            r[9*i+4] |= t[2] << 4;
-            r[9*i+5]  = t[2] >> 4;
-            r[9*i+6]  = t[2] >> 12;
-            r[9*i+6] |= t[3] << 6;
-            r[9*i+7]  = t[3] >> 2;
-            r[9*i+8]  = t[3] >> 10;
+            for(i = 0; i < config.N/4; ++i) {
+                t[0] =allOne32 &( config.GAMMA1 - a.coeffs[aIndex+4*i+0]);
+                t[1] =allOne32 &( config.GAMMA1 - a.coeffs[aIndex+4*i+1]);
+                t[2] =allOne32 &( config.GAMMA1 - a.coeffs[aIndex+4*i+2]);
+                t[3] =allOne32 &( config.GAMMA1 - a.coeffs[aIndex+4*i+3]);
+
+                r[rIndex+9*i+0]  =255&( t[0]);
+                r[rIndex+9*i+1]  =255&( t[0] >> 8);
+                r[rIndex+9*i+2]  =255&( t[0] >> 16);
+                r[rIndex+9*i+2] |=255&( t[1] << 2);
+                r[rIndex+9*i+3]  =255&( t[1] >> 6);
+                r[rIndex+9*i+4]  =255&( t[1] >> 14);
+                r[rIndex+9*i+4] |=255&( t[2] << 4);
+                r[rIndex+9*i+5]  =255&( t[2] >> 4);
+                r[rIndex+9*i+6]  =255&( t[2] >> 12);
+                r[rIndex+9*i+6] |=255&( t[3] << 6);
+                r[rIndex+9*i+7]  =255&( t[3] >> 2);
+                r[rIndex+9*i+8]  =255&( t[3] >> 10);
+            }
+
+
+
         }
-#elif GAMMA1 == (1 << 19)
-        for(i = 0; i < N/2; ++i) {
-            t[0] = GAMMA1 - a->coeffs[2*i+0];
-            t[1] = GAMMA1 - a->coeffs[2*i+1];
+else if (config.GAMMA1 == (1 << 19))
+{
+    for(i = 0; i < config.N/2; ++i) {
+        t[0] =allOne32 &(  config.GAMMA1 - a.coeffs[aIndex+2*i+0]);
+        t[1] =allOne32 &(  config.GAMMA1 - a.coeffs[aIndex+2*i+1]);
 
-            r[5*i+0]  = t[0];
-            r[5*i+1]  = t[0] >> 8;
-            r[5*i+2]  = t[0] >> 16;
-            r[5*i+2] |= t[1] << 4;
-            r[5*i+3]  = t[1] >> 4;
-            r[5*i+4]  = t[1] >> 12;
-        }
-#endif
+        r[rIndex+5*i+0]   =255&(  t[0]);
+        r[rIndex+5*i+1]   =255&(  t[0] >> 8);
+        r[rIndex+5*i+2]   =255&(  t[0] >> 16);
+        r[rIndex+5*i+2] |=255&(  t[1] << 4);
+        r[rIndex+5*i+3]   =255&(  t[1] >> 4);
+        r[rIndex+5*i+4]   =255&(  t[1] >> 12);
+    }
 
-        DBENCH_STOP(*tpack);
+
+}
+
+
+        //DBENCH_STOP(*tpack);
     }
 
     /*************************************************
@@ -985,55 +999,64 @@ else if (config.ETA == 4)
      * Arguments:   - poly *r: pointer to output polynomial
      *              - const uint8_t *a: byte array with bit-packed polynomial
      **************************************************/
-    void polyz_unpack(poly *r, const uint8_t *a) {
-        unsigned int i;
-        DBENCH_START();
+    void polyz_unpack(int rIndex,poly r, int aIndex,int[] a) {
+        int i;
+       // DBENCH_START();
 
-#if GAMMA1 == (1 << 17)
-        for(i = 0; i < N/4; ++i) {
-            r->coeffs[4*i+0]  = a[9*i+0];
-            r->coeffs[4*i+0] |= (uint32_t)a[9*i+1] << 8;
-            r->coeffs[4*i+0] |= (uint32_t)a[9*i+2] << 16;
-            r->coeffs[4*i+0] &= 0x3FFFF;
+if (config.GAMMA1 == (1 << 17))
+{
+    for(i = 0; i < config.N/4; ++i) {
+        r.coeffs[rIndex+4*i+0]  = a[aIndex+9*i+0];
+        r.coeffs[rIndex+4*i+0] |= (uint32_t)a[aIndex+9*i+1] << 8;
+        r.coeffs[rIndex+4*i+0] |= (uint32_t)a[aIndex+9*i+2] << 16;
+        r.coeffs[rIndex+4*i+0] &= 0x3FFFF;
 
-            r->coeffs[4*i+1]  = a[9*i+2] >> 2;
-            r->coeffs[4*i+1] |= (uint32_t)a[9*i+3] << 6;
-            r->coeffs[4*i+1] |= (uint32_t)a[9*i+4] << 14;
-            r->coeffs[4*i+1] &= 0x3FFFF;
+        r.coeffs[rIndex+4*i+1]  = a[aIndex+9*i+2] >> 2;
+        r.coeffs[rIndex+4*i+1] |= (uint32_t)a[aIndex+9*i+3] << 6;
+        r.coeffs[rIndex+4*i+1] |= (uint32_t)a[aIndex+9*i+4] << 14;
+        r.coeffs[rIndex+4*i+1] &= 0x3FFFF;
 
-            r->coeffs[4*i+2]  = a[9*i+4] >> 4;
-            r->coeffs[4*i+2] |= (uint32_t)a[9*i+5] << 4;
-            r->coeffs[4*i+2] |= (uint32_t)a[9*i+6] << 12;
-            r->coeffs[4*i+2] &= 0x3FFFF;
+        r.coeffs[rIndex+4*i+2]  = a[aIndex+9*i+4] >> 4;
+        r.coeffs[rIndex+4*i+2] |= (uint32_t)a[aIndex+9*i+5] << 4;
+        r.coeffs[rIndex+4*i+2] |= (uint32_t)a[aIndex+9*i+6] << 12;
+        r.coeffs[rIndex+4*i+2] &= 0x3FFFF;
 
-            r->coeffs[4*i+3]  = a[9*i+6] >> 6;
-            r->coeffs[4*i+3] |= (uint32_t)a[9*i+7] << 2;
-            r->coeffs[4*i+3] |= (uint32_t)a[9*i+8] << 10;
-            r->coeffs[4*i+3] &= 0x3FFFF;
+        r.coeffs[rIndex+4*i+3]  = a[aIndex+9*i+6] >> 6;
+        r.coeffs[rIndex+4*i+3] |= (uint32_t)a[aIndex+9*i+7] << 2;
+        r.coeffs[rIndex+4*i+3] |= (uint32_t)a[aIndex+9*i+8] << 10;
+        r.coeffs[rIndex+4*i+3] &= 0x3FFFF;
 
-            r->coeffs[4*i+0] = GAMMA1 - r->coeffs[4*i+0];
-            r->coeffs[4*i+1] = GAMMA1 - r->coeffs[4*i+1];
-            r->coeffs[4*i+2] = GAMMA1 - r->coeffs[4*i+2];
-            r->coeffs[4*i+3] = GAMMA1 - r->coeffs[4*i+3];
+        r.coeffs[rIndex+4*i+0] = config.GAMMA1 - r.coeffs[rIndex+4*i+0];
+        r.coeffs[rIndex+4*i+1] = config.GAMMA1 - r.coeffs[rIndex+4*i+1];
+        r.coeffs[rIndex+4*i+2] = config.GAMMA1 - r.coeffs[rIndex+4*i+2];
+        r.coeffs[rIndex+4*i+3] = config.GAMMA1 - r.coeffs[rIndex+4*i+3];
+    }
+
+
+
+}
+else if (config.GAMMA1 == (1 << 19))
+        {
+
+            for(i = 0; i < config.N/2; ++i) {
+                r.coeffs[rIndex+2*i+0]  = a[aIndex+5*i+0];
+                r.coeffs[rIndex+2*i+0] |= (uint32_t)a[aIndex+5*i+1] << 8;
+                r.coeffs[rIndex+2*i+0] |= (uint32_t)a[aIndex+5*i+2] << 16;
+                r.coeffs[rIndex+2*i+0] &= 0xFFFFF;
+
+                r.coeffs[rIndex+2*i+1]  = a[aIndex+5*i+2] >> 4;
+                r.coeffs[rIndex+2*i+1] |= (uint32_t)a[aIndex+5*i+3] << 4;
+                r.coeffs[rIndex+2*i+1] |= (uint32_t)a[aIndex+5*i+4] << 12;
+                r.coeffs[rIndex+2*i+0] &= 0xFFFFF;
+
+                r.coeffs[rIndex+2*i+0] = config.GAMMA1 - r.coeffs[rIndex+2*i+0];
+                r.coeffs[rIndex+2*i+1] = config.GAMMA1 - r.coeffs[2*i+1];
+            }
+
+
         }
-#elif GAMMA1 == (1 << 19)
-        for(i = 0; i < N/2; ++i) {
-            r->coeffs[2*i+0]  = a[5*i+0];
-            r->coeffs[2*i+0] |= (uint32_t)a[5*i+1] << 8;
-            r->coeffs[2*i+0] |= (uint32_t)a[5*i+2] << 16;
-            r->coeffs[2*i+0] &= 0xFFFFF;
 
-            r->coeffs[2*i+1]  = a[5*i+2] >> 4;
-            r->coeffs[2*i+1] |= (uint32_t)a[5*i+3] << 4;
-            r->coeffs[2*i+1] |= (uint32_t)a[5*i+4] << 12;
-            r->coeffs[2*i+0] &= 0xFFFFF;
-
-            r->coeffs[2*i+0] = GAMMA1 - r->coeffs[2*i+0];
-            r->coeffs[2*i+1] = GAMMA1 - r->coeffs[2*i+1];
-        }
-#endif
-
-        DBENCH_STOP(*tpack);
+        //DBENCH_STOP(*tpack);
     }
 
     /*************************************************
@@ -1046,25 +1069,25 @@ else if (config.ETA == 4)
      *                            POLYW1_PACKEDBYTES bytes
      *              - const poly *a: pointer to input polynomial
      **************************************************/
-    void polyw1_pack(uint8_t *r, const poly *a) {
+    void polyw1_pack(int rIndex,uint8_t *r, poly a,int aIndex) {
         unsigned int i;
-        DBENCH_START();
+       // DBENCH_START();
 
 #if GAMMA2 == (Q-1)/88
         for(i = 0; i < N/4; ++i) {
-            r[3*i+0]  = a->coeffs[4*i+0];
-            r[3*i+0] |= a->coeffs[4*i+1] << 6;
-            r[3*i+1]  = a->coeffs[4*i+1] >> 2;
-            r[3*i+1] |= a->coeffs[4*i+2] << 4;
-            r[3*i+2]  = a->coeffs[4*i+2] >> 4;
-            r[3*i+2] |= a->coeffs[4*i+3] << 2;
+            r[rIndex+3*i+0]  = a.coeffs[aIndex+4*i+0];
+            r[rIndex+3*i+0] |= a.coeffs[aIndex+4*i+1] << 6;
+            r[rIndex+3*i+1]  = a.coeffs[aIndex+4*i+1] >> 2;
+            r[rIndex+3*i+1] |= a.coeffs[aIndex+4*i+2] << 4;
+            r[rIndex+3*i+2]  = a.coeffs[aIndex+4*i+2] >> 4;
+            r[rIndex+3*i+2] |= a.coeffs[aIndex+4*i+3] << 2;
         }
 #elif GAMMA2 == (Q-1)/32
         for(i = 0; i < N/2; ++i)
-            r[i] = a->coeffs[2*i+0] | (a->coeffs[2*i+1] << 4);
+            r[rIndex+i] = a.coeffs[aIndex+2*i+0] | (a.coeffs[aIndex+2*i+1] << 4);
 #endif
 
-        DBENCH_STOP(*tpack);
+        //DBENCH_STOP(*tpack);
     }
 
 
