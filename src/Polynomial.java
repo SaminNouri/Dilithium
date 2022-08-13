@@ -1002,28 +1002,29 @@ else if (config.GAMMA1 == (1 << 19))
     void polyz_unpack(int rIndex,poly r, int aIndex,int[] a) {
         int i;
        // DBENCH_START();
+        
 
 if (config.GAMMA1 == (1 << 17))
 {
     for(i = 0; i < config.N/4; ++i) {
         r.coeffs[rIndex+4*i+0]  = a[aIndex+9*i+0];
-        r.coeffs[rIndex+4*i+0] |= (uint32_t)a[aIndex+9*i+1] << 8;
-        r.coeffs[rIndex+4*i+0] |= (uint32_t)a[aIndex+9*i+2] << 16;
+        r.coeffs[rIndex+4*i+0] |= new Long(a[aIndex+9*i+1] )<< 8;
+        r.coeffs[rIndex+4*i+0] |= new Long(a[aIndex+9*i+2]) << 16;
         r.coeffs[rIndex+4*i+0] &= 0x3FFFF;
 
         r.coeffs[rIndex+4*i+1]  = a[aIndex+9*i+2] >> 2;
-        r.coeffs[rIndex+4*i+1] |= (uint32_t)a[aIndex+9*i+3] << 6;
-        r.coeffs[rIndex+4*i+1] |= (uint32_t)a[aIndex+9*i+4] << 14;
+        r.coeffs[rIndex+4*i+1] |= new Long(a[aIndex+9*i+3]) << 6;
+        r.coeffs[rIndex+4*i+1] |= new Long(a[aIndex+9*i+4]) << 14;
         r.coeffs[rIndex+4*i+1] &= 0x3FFFF;
 
         r.coeffs[rIndex+4*i+2]  = a[aIndex+9*i+4] >> 4;
-        r.coeffs[rIndex+4*i+2] |= (uint32_t)a[aIndex+9*i+5] << 4;
-        r.coeffs[rIndex+4*i+2] |= (uint32_t)a[aIndex+9*i+6] << 12;
+        r.coeffs[rIndex+4*i+2] |= new Long(a[aIndex+9*i+5]) << 4;
+        r.coeffs[rIndex+4*i+2] |= new Long(a[aIndex+9*i+6]) << 12;
         r.coeffs[rIndex+4*i+2] &= 0x3FFFF;
 
         r.coeffs[rIndex+4*i+3]  = a[aIndex+9*i+6] >> 6;
-        r.coeffs[rIndex+4*i+3] |= (uint32_t)a[aIndex+9*i+7] << 2;
-        r.coeffs[rIndex+4*i+3] |= (uint32_t)a[aIndex+9*i+8] << 10;
+        r.coeffs[rIndex+4*i+3] |= new Long(a[aIndex+9*i+7]) << 2;
+        r.coeffs[rIndex+4*i+3] |= new Long(a[aIndex+9*i+8]) << 10;
         r.coeffs[rIndex+4*i+3] &= 0x3FFFF;
 
         r.coeffs[rIndex+4*i+0] = config.GAMMA1 - r.coeffs[rIndex+4*i+0];
@@ -1040,13 +1041,13 @@ else if (config.GAMMA1 == (1 << 19))
 
             for(i = 0; i < config.N/2; ++i) {
                 r.coeffs[rIndex+2*i+0]  = a[aIndex+5*i+0];
-                r.coeffs[rIndex+2*i+0] |= (uint32_t)a[aIndex+5*i+1] << 8;
-                r.coeffs[rIndex+2*i+0] |= (uint32_t)a[aIndex+5*i+2] << 16;
+                r.coeffs[rIndex+2*i+0] |= new Long(a[aIndex+5*i+1]) << 8;
+                r.coeffs[rIndex+2*i+0] |= new Long(a[aIndex+5*i+2]) << 16;
                 r.coeffs[rIndex+2*i+0] &= 0xFFFFF;
 
                 r.coeffs[rIndex+2*i+1]  = a[aIndex+5*i+2] >> 4;
-                r.coeffs[rIndex+2*i+1] |= (uint32_t)a[aIndex+5*i+3] << 4;
-                r.coeffs[rIndex+2*i+1] |= (uint32_t)a[aIndex+5*i+4] << 12;
+                r.coeffs[rIndex+2*i+1] |= new Long(a[aIndex+5*i+3]) << 4;
+                r.coeffs[rIndex+2*i+1] |= new Long(a[aIndex+5*i+4]) << 12;
                 r.coeffs[rIndex+2*i+0] &= 0xFFFFF;
 
                 r.coeffs[rIndex+2*i+0] = config.GAMMA1 - r.coeffs[rIndex+2*i+0];
@@ -1069,23 +1070,30 @@ else if (config.GAMMA1 == (1 << 19))
      *                            POLYW1_PACKEDBYTES bytes
      *              - const poly *a: pointer to input polynomial
      **************************************************/
-    void polyw1_pack(int rIndex,uint8_t *r, poly a,int aIndex) {
-        unsigned int i;
+    void polyw1_pack(int rIndex,int[] r, poly a,int aIndex) {
+        int i;
        // DBENCH_START();
 
-#if GAMMA2 == (Q-1)/88
-        for(i = 0; i < N/4; ++i) {
-            r[rIndex+3*i+0]  = a.coeffs[aIndex+4*i+0];
-            r[rIndex+3*i+0] |= a.coeffs[aIndex+4*i+1] << 6;
-            r[rIndex+3*i+1]  = a.coeffs[aIndex+4*i+1] >> 2;
-            r[rIndex+3*i+1] |= a.coeffs[aIndex+4*i+2] << 4;
-            r[rIndex+3*i+2]  = a.coeffs[aIndex+4*i+2] >> 4;
-            r[rIndex+3*i+2] |= a.coeffs[aIndex+4*i+3] << 2;
+if (config.GAMMA2 == (config.Q-1)/88)
+{
+
+    for(i = 0; i < config.N/4; ++i) {
+        r[rIndex+3*i+0]  =255&(a.coeffs[aIndex+4*i+0]);
+        r[rIndex+3*i+0] |=255&( a.coeffs[aIndex+4*i+1] << 6);
+        r[rIndex+3*i+1]  =255&( a.coeffs[aIndex+4*i+1] >> 2);
+        r[rIndex+3*i+1] |=255&( a.coeffs[aIndex+4*i+2] << 4);
+        r[rIndex+3*i+2]  =255&( a.coeffs[aIndex+4*i+2] >> 4);
+        r[rIndex+3*i+2] |=255&( a.coeffs[aIndex+4*i+3] << 2);
+    }
+
+}
+else if (config.GAMMA2 == (config.Q-1)/32)
+        {
+            for(i = 0; i < config.N/2; ++i)
+                r[rIndex+i] = 255&(a.coeffs[aIndex+2*i+0]) | 255&(a.coeffs[aIndex+2*i+1] << 4);
+
         }
-#elif GAMMA2 == (Q-1)/32
-        for(i = 0; i < N/2; ++i)
-            r[rIndex+i] = a.coeffs[aIndex+2*i+0] | (a.coeffs[aIndex+2*i+1] << 4);
-#endif
+
 
         //DBENCH_STOP(*tpack);
     }
