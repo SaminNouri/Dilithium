@@ -1001,30 +1001,32 @@ else if (config.GAMMA1 == (1 << 19))
      **************************************************/
     void polyz_unpack(int rIndex,poly r, int aIndex,int[] a) {
         int i;
+
+        Long allOne32=this.allOne32.longValue();
        // DBENCH_START();
-        
+
 
 if (config.GAMMA1 == (1 << 17))
 {
     for(i = 0; i < config.N/4; ++i) {
         r.coeffs[rIndex+4*i+0]  = a[aIndex+9*i+0];
-        r.coeffs[rIndex+4*i+0] |= new Long(a[aIndex+9*i+1] )<< 8;
-        r.coeffs[rIndex+4*i+0] |= new Long(a[aIndex+9*i+2]) << 16;
+        r.coeffs[rIndex+4*i+0] |= (new Long(a[aIndex+9*i+1] )&allOne32)<< 8;
+        r.coeffs[rIndex+4*i+0] |= (new Long(a[aIndex+9*i+2])&allOne32) << 16;
         r.coeffs[rIndex+4*i+0] &= 0x3FFFF;
 
         r.coeffs[rIndex+4*i+1]  = a[aIndex+9*i+2] >> 2;
-        r.coeffs[rIndex+4*i+1] |= new Long(a[aIndex+9*i+3]) << 6;
-        r.coeffs[rIndex+4*i+1] |= new Long(a[aIndex+9*i+4]) << 14;
+        r.coeffs[rIndex+4*i+1] |= (new Long(a[aIndex+9*i+3])&allOne32) << 6;
+        r.coeffs[rIndex+4*i+1] |= (new Long(a[aIndex+9*i+4])&allOne32) << 14;
         r.coeffs[rIndex+4*i+1] &= 0x3FFFF;
 
         r.coeffs[rIndex+4*i+2]  = a[aIndex+9*i+4] >> 4;
-        r.coeffs[rIndex+4*i+2] |= new Long(a[aIndex+9*i+5]) << 4;
-        r.coeffs[rIndex+4*i+2] |= new Long(a[aIndex+9*i+6]) << 12;
+        r.coeffs[rIndex+4*i+2] |= (new Long(a[aIndex+9*i+5])&allOne32) << 4;
+        r.coeffs[rIndex+4*i+2] |= (new Long(a[aIndex+9*i+6])&allOne32) << 12;
         r.coeffs[rIndex+4*i+2] &= 0x3FFFF;
 
         r.coeffs[rIndex+4*i+3]  = a[aIndex+9*i+6] >> 6;
-        r.coeffs[rIndex+4*i+3] |= new Long(a[aIndex+9*i+7]) << 2;
-        r.coeffs[rIndex+4*i+3] |= new Long(a[aIndex+9*i+8]) << 10;
+        r.coeffs[rIndex+4*i+3] |= (new Long(a[aIndex+9*i+7])&allOne32) << 2;
+        r.coeffs[rIndex+4*i+3] |= (new Long(a[aIndex+9*i+8])&allOne32) << 10;
         r.coeffs[rIndex+4*i+3] &= 0x3FFFF;
 
         r.coeffs[rIndex+4*i+0] = config.GAMMA1 - r.coeffs[rIndex+4*i+0];
@@ -1041,13 +1043,13 @@ else if (config.GAMMA1 == (1 << 19))
 
             for(i = 0; i < config.N/2; ++i) {
                 r.coeffs[rIndex+2*i+0]  = a[aIndex+5*i+0];
-                r.coeffs[rIndex+2*i+0] |= new Long(a[aIndex+5*i+1]) << 8;
-                r.coeffs[rIndex+2*i+0] |= new Long(a[aIndex+5*i+2]) << 16;
+                r.coeffs[rIndex+2*i+0] |= (new Long(a[aIndex+5*i+1]) &allOne32)<< 8;
+                r.coeffs[rIndex+2*i+0] |= (new Long(a[aIndex+5*i+2])&allOne32) << 16;
                 r.coeffs[rIndex+2*i+0] &= 0xFFFFF;
 
                 r.coeffs[rIndex+2*i+1]  = a[aIndex+5*i+2] >> 4;
-                r.coeffs[rIndex+2*i+1] |= new Long(a[aIndex+5*i+3]) << 4;
-                r.coeffs[rIndex+2*i+1] |= new Long(a[aIndex+5*i+4]) << 12;
+                r.coeffs[rIndex+2*i+1] |= (new Long(a[aIndex+5*i+3])&allOne32) << 4;
+                r.coeffs[rIndex+2*i+1] |= (new Long(a[aIndex+5*i+4])&allOne32) << 12;
                 r.coeffs[rIndex+2*i+0] &= 0xFFFFF;
 
                 r.coeffs[rIndex+2*i+0] = config.GAMMA1 - r.coeffs[rIndex+2*i+0];
