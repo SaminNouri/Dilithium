@@ -912,6 +912,5 @@ void polyw1_pack(uint8_t *r, const poly *a) {
 }
 
 
-int main(){
 
-}
+#include "poly_test.c"
