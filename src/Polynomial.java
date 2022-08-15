@@ -397,7 +397,7 @@ public int POLY_UNIFORM_NBLOCKS= ((768 + config.STREAM128_BLOCKBYTES - 1)/config
         }else {
 
             stateKeccak=new KeccakState();
-            Fips202.shake128_init(stateKeccak);
+            Fips202.dilithium_shake128_stream_init(stateKeccak,seedIndex,seed,nonce);
             Fips202.shake128_squeezeblocks(buf,bufIndex,POLY_UNIFORM_NBLOCKS,stateKeccak);
 
 
@@ -547,7 +547,7 @@ else if (config.ETA == 4)
         }else {
 
             stateKeccak=new KeccakState();
-            Fips202.shake256_init(stateKeccak);
+            Fips202.dilithium_shake256_stream_init(stateKeccak,seedIndex,seed,nonce);
             Fips202.shake256_squeezeblocks(buf,bufIndex,POLY_UNIFORM_ETA_NBLOCKS,stateKeccak);
 
 
@@ -607,7 +607,7 @@ public static int POLY_UNIFORM_GAMMA1_NBLOCKS= ((config.POLYZ_PACKEDBYTES + conf
         }else {
 
             stateKeccak=new KeccakState();
-            Fips202.shake256_init(stateKeccak);
+            Fips202.dilithium_shake128_stream_init(stateKeccak,seedIndex,seed,nonce);
             Fips202.shake256_squeezeblocks(buf,bufIndex,POLY_UNIFORM_GAMMA1_NBLOCKS,stateKeccak);
 
 

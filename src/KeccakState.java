@@ -145,11 +145,10 @@ public class KeccakState {
 	 * pointer to input to be absorbed into s - long inlen: length of input in bytes
 	 * - byte p: domain-separation byte for different Keccak-derived functions
 	 **************************************************/
-	void keccak_absorb_once(int r, int[] in, long inlen, int p) {
+	void keccak_absorb_once(int r,int inIndex, int[] in, long inlen, int p) {
 		int i;
 		for (i = 0; i < 25; i++)
 			s[i] = new BigInteger("0");
-		int inIndex = 0;
 		while (inlen >= r) {
 			for (i = 0; i < r / 8; i++)
 				s[i] = s[i].xor(Fips202.load64(in, inIndex + 8 * i));
