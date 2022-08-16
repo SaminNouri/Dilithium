@@ -31,7 +31,7 @@ public class Polynomial {
      *
      * Arguments:   - poly *a: pointer to input/output polynomial
      **************************************************/
-    void poly_reduce(poly a,int aIndex) {
+   static void poly_reduce(poly a,int aIndex) {
         int i;
         //DBENCH_START();
 
@@ -49,7 +49,7 @@ public class Polynomial {
      *
      * Arguments:   - poly *a: pointer to input/output polynomial
      **************************************************/
-    void poly_caddq(poly a,int aIndex) {
+    static void poly_caddq(poly a,int aIndex) {
         int i;
         //DBENCH_START();
 
@@ -68,7 +68,7 @@ public class Polynomial {
      *              - const poly *a: pointer to first summand
      *              - const poly *b: pointer to second summand
      **************************************************/
-    void poly_add(poly c,int cIndex, poly a,int aIndex,poly b, int bIndex)  {
+    static void poly_add(poly c,int cIndex, poly a,int aIndex,poly b, int bIndex)  {
         int i;
         //DBENCH_START();
 
@@ -89,7 +89,7 @@ public class Polynomial {
      *              - const poly *b: pointer to second input polynomial to be
      *                               subtraced from first input polynomial
      **************************************************/
-    void poly_sub(poly c,int cIndex, poly a,int aIndex,poly b, int bIndex) {
+    static void poly_sub(poly c,int cIndex, poly a,int aIndex,poly b, int bIndex) {
         int i;
        // DBENCH_START();
 
@@ -108,7 +108,7 @@ public class Polynomial {
      * Arguments:   - poly *a: pointer to input/output polynomial
      **************************************************/
     //todo: pay attention to shift!
-    void poly_shiftl(poly a,int aIndex) {
+    static void poly_shiftl(poly a,int aIndex) {
         int i;
         //DBENCH_START();
 
@@ -126,7 +126,7 @@ public class Polynomial {
      *
      * Arguments:   - poly *a: pointer to input/output polynomial
      **************************************************/
-    void poly_ntt(poly a,int aIndex) {
+    static void poly_ntt(poly a,int aIndex) {
        // DBENCH_START();
 
         nttObject.ntt(a.coeffs,aIndex);
@@ -143,7 +143,7 @@ public class Polynomial {
      *
      * Arguments:   - poly *a: pointer to input/output polynomial
      **************************************************/
-    void poly_invntt_tomont(poly a,int aIndex) {
+    static void poly_invntt_tomont(poly a,int aIndex) {
        // DBENCH_START();
 
         nttObject.invntt_tomont(a.coeffs,aIndex);
@@ -164,7 +164,7 @@ public class Polynomial {
      **************************************************/
 
     //todo: fix long!
-    void poly_pointwise_montgomery(poly c,int cIndex, poly a,int aIndex, poly b,int bIndex) {
+    static void poly_pointwise_montgomery(poly c,int cIndex, poly a,int aIndex, poly b,int bIndex) {
         int i;
         //DBENCH_START();
 
@@ -186,7 +186,7 @@ public class Polynomial {
      *              - poly *a0: pointer to output polynomial with coefficients c0
      *              - const poly *a: pointer to input polynomial
      **************************************************/
-    void poly_power2round(poly a1,int a1Index, poly a0,int a0Index, poly a,int aIndex) {
+    static void poly_power2round(poly a1,int a1Index, poly a0,int a0Index, poly a,int aIndex) {
         int i;
         //DBENCH_START();
         Pair p = null;
@@ -217,7 +217,7 @@ public class Polynomial {
      *              - poly *a0: pointer to output polynomial with coefficients c0
      *              - const poly *a: pointer to input polynomial
      **************************************************/
-    void poly_decompose(poly a1,int a1Index, poly a0,int a0Index,poly a,int aIndex) {
+    static void poly_decompose(poly a1,int a1Index, poly a0,int a0Index,poly a,int aIndex) {
         int i;
        // DBENCH_START();
         Pair p=null;
@@ -245,7 +245,7 @@ public class Polynomial {
  *
  * Returns number of 1 bits.
  **************************************************/
-    int poly_make_hint(poly h,int hIndex, poly a0,int a0Index,poly a1, int a1Index) {
+static int poly_make_hint(poly h, int hIndex, poly a0, int a0Index, poly a1, int a1Index) {
         int i, s = 0;
         //DBENCH_START();
 
@@ -267,7 +267,7 @@ public class Polynomial {
      *              - const poly *a: pointer to input polynomial
      *              - const poly *h: pointer to input hint polynomial
      **************************************************/
-    void poly_use_hint(poly b,int bIndex, poly a,int aIndex, poly h, int hIndex) throws DilithiumModeException {
+    static void poly_use_hint(poly b,int bIndex, poly a,int aIndex, poly h, int hIndex) throws DilithiumModeException {
         int i;
         //DBENCH_START();
 
@@ -288,7 +288,7 @@ public class Polynomial {
      *
      * Returns 0 if norm is strictly smaller than B <= (Q-1)/8 and 1 otherwise.
      **************************************************/
-    int poly_chknorm(poly a,int aIndex, int B) {
+    static int poly_chknorm(poly a, int aIndex, int B) {
         int i;
         int t;
         //DBENCH_START();
@@ -371,12 +371,12 @@ public class Polynomial {
  *              - const uint8_t seed[]: byte array with seed of length SEEDBYTES
  *              - uint16_t nonce: 2-byte nonce
  **************************************************/
-public int POLY_UNIFORM_NBLOCKS= ((768 + config.STREAM128_BLOCKBYTES - 1)/config.STREAM128_BLOCKBYTES);
+public static int POLY_UNIFORM_NBLOCKS= ((768 + config.STREAM128_BLOCKBYTES - 1)/config.STREAM128_BLOCKBYTES);
 
 //a is a pointer!
     //nonce is unsigned 16 bit
     //seed,buf are unsigned 8 bit
-    void poly_uniform(poly a,int aIndex,
+    static void poly_uniform(poly a,int aIndex,
                   int[] seed,int seedIndex,
                       int nonce)
     {
@@ -501,7 +501,7 @@ else if (config.ETA == 4)
  **************************************************/
 
 
-    void poly_uniform_eta(int aIndex,poly a,
+    static void poly_uniform_eta(int aIndex,poly a,
                      int seedIndex, int[] seed,
                           int nonce)
     {
@@ -585,7 +585,7 @@ else if (config.ETA == 4)
  *              - uint16_t nonce: 16-bit nonce
  **************************************************/
 public static int POLY_UNIFORM_GAMMA1_NBLOCKS= ((config.POLYZ_PACKEDBYTES + config.STREAM256_BLOCKBYTES - 1)/config.STREAM256_BLOCKBYTES);
-    void poly_uniform_gamma1(int aIndex,poly a,
+    static void poly_uniform_gamma1(int aIndex,poly a,
                          int seedIndex,int[] seed,
                              int nonce)
     {
@@ -630,7 +630,7 @@ public static int POLY_UNIFORM_GAMMA1_NBLOCKS= ((config.POLYZ_PACKEDBYTES + conf
      **************************************************/
 
 
-    void poly_challenge(int cIdex, poly c,int seedIndex, int[] seed) {
+    static void poly_challenge(int cIdex, poly c,int seedIndex, int[] seed) {
         int i, b, pos;
         BigInteger signs;
         int[] buf=new int[config.SHAKE256_RATE];
@@ -679,7 +679,7 @@ public static int POLY_UNIFORM_GAMMA1_NBLOCKS= ((config.POLYZ_PACKEDBYTES + conf
      *                            POLYETA_PACKEDBYTES bytes
      *              - const poly *a: pointer to input polynomial
      **************************************************/
-    void polyeta_pack(int rIndex,int[] r, int aIndex,poly a) {
+    static void polyeta_pack(int rIndex,int[] r, int aIndex,poly a) {
         int i;
         int[] t=new int[8];
         //DBENCH_START();
@@ -726,7 +726,7 @@ if (config.ETA == 2)
      *              - const uint8_t *a: byte array with bit-packed polynomial
      **************************************************/
     //no idea!
-    void polyeta_unpack(int rIndex,poly r, int aIndex,int[] a) {
+    static void polyeta_unpack(int rIndex,poly r, int aIndex,int[] a) {
         int i;
         //DBENCH_START();
 
@@ -777,7 +777,7 @@ else if (config.ETA == 4)
      *                            POLYT1_PACKEDBYTES bytes
      *              - const poly *a: pointer to input polynomial
      **************************************************/
-    void polyt1_pack(int rIndex,int[] r, poly a, int aIndex) {
+    static void polyt1_pack(int rIndex,int[] r, poly a, int aIndex) {
         int i;
         //DBENCH_START();
 
@@ -801,7 +801,7 @@ else if (config.ETA == 4)
      * Arguments:   - poly *r: pointer to output polynomial
      *              - const uint8_t *a: byte array with bit-packed polynomial
      **************************************************/
-    void polyt1_unpack(int rIndex,poly r,int aIndex, int[] a) {
+    static void polyt1_unpack(int rIndex,poly r,int aIndex, int[] a) {
         int i;
         //DBENCH_START();
 
@@ -824,21 +824,21 @@ else if (config.ETA == 4)
      *                            POLYT0_PACKEDBYTES bytes
      *              - const poly *a: pointer to input polynomial
      **************************************************/
-    void polyt0_pack(int[] r,int aIndex, poly a) {
+    static void polyt0_pack(int[] r,int aIndex, poly a) {
         int i;
         Long[] t=new Long[8];
-        Long allOne32=this.allOne32.longValue();
+        Long allOne32t=allOne32.longValue();
         //DBENCH_START();
 
         for(i = 0; i < config.N/8; ++i) {
-            t[0] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+0]);
-            t[1] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+1]);
-            t[2] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+2]);
-            t[3] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+3]);
-            t[4] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+4]);
-            t[5] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+5]);
-            t[6] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+6]);
-            t[7] = allOne32 &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+7]);
+            t[0] = allOne32t &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+0]);
+            t[1] = allOne32t &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+1]);
+            t[2] = allOne32t &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+2]);
+            t[3] = allOne32t &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+3]);
+            t[4] = allOne32t &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+4]);
+            t[5] = allOne32t &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+5]);
+            t[6] = allOne32t &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+6]);
+            t[7] = allOne32t &((1 << (config.D-1)) - a.coeffs[aIndex+8*i+7]);
 
             r[13*i+ 0]  = (int) (255&(  t[0]));
             r[13*i+ 1]  = (int) (255&(  t[0] >>  8));
@@ -873,7 +873,7 @@ else if (config.ETA == 4)
      * Arguments:   - poly *r: pointer to output polynomial
      *              - const uint8_t *a: byte array with bit-packed polynomial
      **************************************************/
-    void polyt0_unpack(int rIndex,poly r,int aIndex, int[] a) {
+    static void polyt0_unpack(int rIndex,poly r,int aIndex, int[] a) {
         int i;
         //DBENCH_START();
 
@@ -937,20 +937,20 @@ else if (config.ETA == 4)
      *                            POLYZ_PACKEDBYTES bytes
      *              - const poly *a: pointer to input polynomial
      **************************************************/
-    void polyz_pack(int rIndex,int[] r, int aIndex,poly a) {
+    static void polyz_pack(int rIndex,int[] r, int aIndex,poly a) {
          int i;
         int[]  t=new int[4];
-        int allOne32=this.allOne32.intValue();
+        int allOne32t=allOne32.intValue();
         //DBENCH_START();
 
 if (config.GAMMA1 == (1 << 17))
         {
 
             for(i = 0; i < config.N/4; ++i) {
-                t[0] =allOne32 &( config.GAMMA1 - a.coeffs[aIndex+4*i+0]);
-                t[1] =allOne32 &( config.GAMMA1 - a.coeffs[aIndex+4*i+1]);
-                t[2] =allOne32 &( config.GAMMA1 - a.coeffs[aIndex+4*i+2]);
-                t[3] =allOne32 &( config.GAMMA1 - a.coeffs[aIndex+4*i+3]);
+                t[0] =allOne32t &( config.GAMMA1 - a.coeffs[aIndex+4*i+0]);
+                t[1] =allOne32t &( config.GAMMA1 - a.coeffs[aIndex+4*i+1]);
+                t[2] =allOne32t &( config.GAMMA1 - a.coeffs[aIndex+4*i+2]);
+                t[3] =allOne32t &( config.GAMMA1 - a.coeffs[aIndex+4*i+3]);
 
                 r[rIndex+9*i+0]  =255&( t[0]);
                 r[rIndex+9*i+1]  =255&( t[0] >> 8);
@@ -972,8 +972,8 @@ if (config.GAMMA1 == (1 << 17))
 else if (config.GAMMA1 == (1 << 19))
 {
     for(i = 0; i < config.N/2; ++i) {
-        t[0] =allOne32 &(  config.GAMMA1 - a.coeffs[aIndex+2*i+0]);
-        t[1] =allOne32 &(  config.GAMMA1 - a.coeffs[aIndex+2*i+1]);
+        t[0] =allOne32t &(  config.GAMMA1 - a.coeffs[aIndex+2*i+0]);
+        t[1] =allOne32t &(  config.GAMMA1 - a.coeffs[aIndex+2*i+1]);
 
         r[rIndex+5*i+0]   =255&(  t[0]);
         r[rIndex+5*i+1]   =255&(  t[0] >> 8);
@@ -999,10 +999,10 @@ else if (config.GAMMA1 == (1 << 19))
      * Arguments:   - poly *r: pointer to output polynomial
      *              - const uint8_t *a: byte array with bit-packed polynomial
      **************************************************/
-    void polyz_unpack(int rIndex,poly r, int aIndex,int[] a) {
+    static void polyz_unpack(int rIndex,poly r, int aIndex,int[] a) {
         int i;
 
-        Long allOne32=this.allOne32.longValue();
+        Long allOne32t=allOne32.longValue();
        // DBENCH_START();
 
 
@@ -1010,23 +1010,23 @@ if (config.GAMMA1 == (1 << 17))
 {
     for(i = 0; i < config.N/4; ++i) {
         r.coeffs[rIndex+4*i+0]  = a[aIndex+9*i+0];
-        r.coeffs[rIndex+4*i+0] |= (new Long(a[aIndex+9*i+1] )&allOne32)<< 8;
-        r.coeffs[rIndex+4*i+0] |= (new Long(a[aIndex+9*i+2])&allOne32) << 16;
+        r.coeffs[rIndex+4*i+0] |= (new Long(a[aIndex+9*i+1] )&allOne32t)<< 8;
+        r.coeffs[rIndex+4*i+0] |= (new Long(a[aIndex+9*i+2])&allOne32t) << 16;
         r.coeffs[rIndex+4*i+0] &= 0x3FFFF;
 
         r.coeffs[rIndex+4*i+1]  = a[aIndex+9*i+2] >> 2;
-        r.coeffs[rIndex+4*i+1] |= (new Long(a[aIndex+9*i+3])&allOne32) << 6;
-        r.coeffs[rIndex+4*i+1] |= (new Long(a[aIndex+9*i+4])&allOne32) << 14;
+        r.coeffs[rIndex+4*i+1] |= (new Long(a[aIndex+9*i+3])&allOne32t) << 6;
+        r.coeffs[rIndex+4*i+1] |= (new Long(a[aIndex+9*i+4])&allOne32t) << 14;
         r.coeffs[rIndex+4*i+1] &= 0x3FFFF;
 
         r.coeffs[rIndex+4*i+2]  = a[aIndex+9*i+4] >> 4;
-        r.coeffs[rIndex+4*i+2] |= (new Long(a[aIndex+9*i+5])&allOne32) << 4;
-        r.coeffs[rIndex+4*i+2] |= (new Long(a[aIndex+9*i+6])&allOne32) << 12;
+        r.coeffs[rIndex+4*i+2] |= (new Long(a[aIndex+9*i+5])&allOne32t) << 4;
+        r.coeffs[rIndex+4*i+2] |= (new Long(a[aIndex+9*i+6])&allOne32t) << 12;
         r.coeffs[rIndex+4*i+2] &= 0x3FFFF;
 
         r.coeffs[rIndex+4*i+3]  = a[aIndex+9*i+6] >> 6;
-        r.coeffs[rIndex+4*i+3] |= (new Long(a[aIndex+9*i+7])&allOne32) << 2;
-        r.coeffs[rIndex+4*i+3] |= (new Long(a[aIndex+9*i+8])&allOne32) << 10;
+        r.coeffs[rIndex+4*i+3] |= (new Long(a[aIndex+9*i+7])&allOne32t) << 2;
+        r.coeffs[rIndex+4*i+3] |= (new Long(a[aIndex+9*i+8])&allOne32t) << 10;
         r.coeffs[rIndex+4*i+3] &= 0x3FFFF;
 
         r.coeffs[rIndex+4*i+0] = config.GAMMA1 - r.coeffs[rIndex+4*i+0];
@@ -1043,13 +1043,13 @@ else if (config.GAMMA1 == (1 << 19))
 
             for(i = 0; i < config.N/2; ++i) {
                 r.coeffs[rIndex+2*i+0]  = a[aIndex+5*i+0];
-                r.coeffs[rIndex+2*i+0] |= (new Long(a[aIndex+5*i+1]) &allOne32)<< 8;
-                r.coeffs[rIndex+2*i+0] |= (new Long(a[aIndex+5*i+2])&allOne32) << 16;
+                r.coeffs[rIndex+2*i+0] |= (new Long(a[aIndex+5*i+1]) &allOne32t)<< 8;
+                r.coeffs[rIndex+2*i+0] |= (new Long(a[aIndex+5*i+2])&allOne32t) << 16;
                 r.coeffs[rIndex+2*i+0] &= 0xFFFFF;
 
                 r.coeffs[rIndex+2*i+1]  = a[aIndex+5*i+2] >> 4;
-                r.coeffs[rIndex+2*i+1] |= (new Long(a[aIndex+5*i+3])&allOne32) << 4;
-                r.coeffs[rIndex+2*i+1] |= (new Long(a[aIndex+5*i+4])&allOne32) << 12;
+                r.coeffs[rIndex+2*i+1] |= (new Long(a[aIndex+5*i+3])&allOne32t) << 4;
+                r.coeffs[rIndex+2*i+1] |= (new Long(a[aIndex+5*i+4])&allOne32t) << 12;
                 r.coeffs[rIndex+2*i+0] &= 0xFFFFF;
 
                 r.coeffs[rIndex+2*i+0] = config.GAMMA1 - r.coeffs[rIndex+2*i+0];
@@ -1072,7 +1072,7 @@ else if (config.GAMMA1 == (1 << 19))
      *                            POLYW1_PACKEDBYTES bytes
      *              - const poly *a: pointer to input polynomial
      **************************************************/
-    void polyw1_pack(int rIndex,int[] r, poly a,int aIndex) {
+    static void polyw1_pack(int rIndex,int[] r, poly a,int aIndex) {
         int i;
        // DBENCH_START();
 
