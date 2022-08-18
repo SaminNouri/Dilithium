@@ -10,6 +10,10 @@
 #include "fips202.c"
 #include "fips202.h"
 #include "symmetric.h"
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <inttypes.h>
 
 #ifdef DBENCH
 #include "test/cpucycles.h"
@@ -346,6 +350,7 @@ static unsigned int rej_uniform(int32_t *a,
 *              - const uint8_t seed[]: byte array with seed of length SEEDBYTES
 *              - uint16_t nonce: 2-byte nonce
 **************************************************/
+//tested without aes use
 #define POLY_UNIFORM_NBLOCKS ((768 + STREAM128_BLOCKBYTES - 1)/STREAM128_BLOCKBYTES)
 void poly_uniform(poly *a,
                   const uint8_t seed[SEEDBYTES],
@@ -386,6 +391,7 @@ void poly_uniform(poly *a,
 * Returns number of sampled coefficients. Can be smaller than len if not enough
 * random bytes were given.
 **************************************************/
+//tested
 static unsigned int rej_eta(int32_t *a,
                             unsigned int len,
                             const uint8_t *buf,
@@ -441,7 +447,7 @@ void poly_uniform_eta(poly *a,
                       const uint8_t seed[CRHBYTES],
                       uint16_t nonce)
 {
-  unsigned int ctr;
+  unsigned int ctr=0;
   unsigned int buflen = POLY_UNIFORM_ETA_NBLOCKS*STREAM256_BLOCKBYTES;
   uint8_t buf[POLY_UNIFORM_ETA_NBLOCKS*STREAM256_BLOCKBYTES];
   stream256_state state;
@@ -449,12 +455,18 @@ void poly_uniform_eta(poly *a,
   stream256_init(&state, seed, nonce);
   stream256_squeezeblocks(buf, POLY_UNIFORM_ETA_NBLOCKS, &state);
 
+
+
+
   ctr = rej_eta(a->coeffs, N, buf, buflen);
 
-  while(ctr < N) {
+
+
+
+ while(ctr < N) {
     stream256_squeezeblocks(buf, 1, &state);
     ctr += rej_eta(a->coeffs + ctr, N - ctr, buf, STREAM256_BLOCKBYTES);
-  }
+ }
 }
 
 /*************************************************
@@ -478,6 +490,8 @@ void poly_uniform_gamma1(poly *a,
 
   stream256_init(&state, seed, nonce);
   stream256_squeezeblocks(buf, POLY_UNIFORM_GAMMA1_NBLOCKS, &state);
+
+
   polyz_unpack(a, buf);
 }
 

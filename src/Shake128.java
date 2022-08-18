@@ -13,9 +13,10 @@ public class Shake128 {
 		// indtead of returing pos, this method should change state.pos itself
 		state.keccak_squeeze(out, beginIndex, outlen, SHAKE128_RATE);
 	}
-	
+
+	//warning!
 	void shake128_absorb_once(KeccakState state, int[] in, long inlen) {
-		state.keccak_absorb_once(SHAKE128_RATE, in, inlen, (byte) 0x1F);
+		state.keccak_absorb_once(SHAKE128_RATE,0, in, inlen, (byte) 0x1F);
 		state.pos = SHAKE128_RATE;
 	}
 	

@@ -681,8 +681,8 @@ public class Fips202 {
 	{
 		Config config=new Config();
 		int[] t=new int[2];
-		t[0] = nonce;
-		t[1] = nonce >> 8;
+		t[0] = nonce&255;
+		t[1] =(nonce >> 8)&255;
 
 		shake256_init(state);
 		shake256_absorb(state,seedIndex, seed, config.CRHBYTES);

@@ -1,8 +1,10 @@
+package test;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 
 public class TestTest {
-
+/*
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
@@ -16,10 +18,10 @@ public class TestTest {
 		KeccakState state = new KeccakState();
 		int SEEDBYTES = 2;
 		int[] seed = {1,2};
-		fips.shake128_init(state);
-		fips.shake128_absorb(state, seed, SEEDBYTES);
-		fips.shake128_finalize(state);
-		fips.shake128_squeezeblocks(buff,0, 1, state);
+		//fips.shake128_init(state);
+		//fips.shake128_absorb(state, seed, SEEDBYTES);
+		//fips.shake128_finalize(state);
+		///fips.shake128_squeezeblocks(buff,0, 1, state);
 		//System.out.println(buff.length);
 		System.out.println(Arrays.toString(buff));
 //		  for(i=0;i<25;i++){
@@ -35,6 +37,6 @@ public class TestTest {
 		 
 		 
 		
-	}
+	}*/
 
 }

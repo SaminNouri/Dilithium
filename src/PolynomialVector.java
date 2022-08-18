@@ -401,7 +401,7 @@ public class PolynomialVector {
         int i;
 
         for(i = 0; i < config.K; ++i)
-            Polynomial.polyw1_pack(rIndex+i*config.POLYW1_PACKEDBYTES,r, w1.vec[i],0);
+            Polynomial.polyw1_pack(rIndex+i*config.POLYW1_PACKEDBYTES,r, 0,w1.vec[i]);
     }
 
 
