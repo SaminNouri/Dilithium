@@ -96,3 +96,4 @@ void invntt_tomont(int32_t a[N]) {
     a[j] = montgomery_reduce((int64_t)f * a[j]);
   }
 }
+

@@ -1,7 +1,8 @@
 #include "params.h"
 #include "packing.h"
+#include "polyvec.c"
 #include "polyvec.h"
-#include "poly.h"
+//#include "poly.h"
 
 /*************************************************
 * Name:        pack_pk
@@ -83,12 +84,22 @@ void pack_sk(uint8_t sk[CRYPTO_SECRETKEYBYTES],
   for(i = 0; i < SEEDBYTES; ++i)
     sk[i] = tr[i];
   sk += SEEDBYTES;
+//it was L
+ for(i = 0; i < L; ++i)
+    {
+   /*  int j=0;
+     printf("mew:\n");
+     for(j = 0; j < N; j++)
+     {
+     printf("%d\n", (s1->vec[i]).coeffs[j]);
+     }*/
 
-  for(i = 0; i < L; ++i)
-    polyeta_pack(sk + i*POLYETA_PACKEDBYTES, &s1->vec[i]);
+   polyeta_pack(sk + i*POLYETA_PACKEDBYTES, &s1->vec[i]);
+
+    }
   sk += L*POLYETA_PACKEDBYTES;
 
-  for(i = 0; i < K; ++i)
+   for(i = 0; i < K; ++i)
     polyeta_pack(sk + i*POLYETA_PACKEDBYTES, &s2->vec[i]);
   sk += K*POLYETA_PACKEDBYTES;
 
@@ -235,3 +246,4 @@ int unpack_sig(uint8_t c[SEEDBYTES],
 
   return 0;
 }
+

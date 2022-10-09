@@ -613,10 +613,10 @@ public class Fips202 {
 	 * length in bytes - const byte *in: pointer to input - long inlen: length of
 	 * input in bytes
 	 **************************************************/
-	static void shake256(int[] out, long outlen,int inIndex, int[] in, long inlen) {
+	static void shake256(int out_Index,int[] out, long outlen,int inIndex, int[] in, long inlen) {
 		long nblocks;
-		int out_Index = 0;
 		KeccakState state = new KeccakState();
+		state.keccakInit();
 		shake256_absorb_once(state,inIndex, in, inlen);
 		nblocks = outlen / SHAKE256_RATE;
 		shake256_squeezeblocks(out, out_Index, nblocks, state);

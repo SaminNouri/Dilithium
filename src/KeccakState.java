@@ -51,7 +51,6 @@ public class KeccakState {
 				temp = temp.shiftLeft(8 * (i % 8));
 				temp = temp.and(Fips202.allOne64);
 				s[i / 8] = s[i / 8].xor(temp);
-//	    	s[i/8] ^= (uint64_t) * in++ << 8*(i%8);
 			}
 
 
@@ -66,8 +65,6 @@ public class KeccakState {
 			temp = temp.shiftLeft(8 * (i % 8));
 			temp = temp.and(Fips202.allOne64);
 			s[i / 8] = s[i / 8].xor(temp);
-
-//		  s[i/8] ^= (uint64_t)*in++ << 8*(i%8);
 		}
 
 
@@ -115,9 +112,9 @@ public class KeccakState {
 	 * @return*/
 
 
-	// TODO
 	int keccak_squeeze(int[] out, int beginIndex, long outlen, int r) {
 		int i;
+		System.out.println("begin:"+beginIndex);
 		while (outlen > 0) {
 			if (pos == r) {
 				Fips202.KeccakF1600_StatePermute(s);
@@ -125,12 +122,14 @@ public class KeccakState {
 			}
 			for (i = pos; i < r && i < pos + outlen; i++) {
 				BigInteger temp = s[i / 8].shiftRight(8 * (i % 8));
+				//System.out.println(temp+" "+temp.and(new BigInteger("255"))+" "+Arrays.toString(out));
 				temp = temp.and(new BigInteger("255"));
 				out[beginIndex++] = temp.intValue();
 			}
 			outlen -= (i - pos);
 			pos = i;
 		}
+
 		return pos;
 	}
 
@@ -158,7 +157,7 @@ public class KeccakState {
 		}
 
 		for (i = 0; i < inlen; i++) {
-			BigInteger temp = new BigInteger(Integer.toString(in[i]));
+			BigInteger temp = new BigInteger(Integer.toString(in[i+inIndex]));
 			temp = temp.shiftLeft(8 * (i % 8));
 			temp = temp.and(Fips202.allOne64);
 			s[i / 8] = s[i / 8].xor(temp);

@@ -7,6 +7,10 @@ public class polyveck {
         Config config=new Config();
         vec=new poly[config.K];
 
+        for (int i=0;i<config.K;i++){
+            vec[i]=new poly();
+        }
+
 
     }
 }

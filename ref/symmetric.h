@@ -14,8 +14,8 @@ typedef aes256ctr_ctx stream256_state;
 
 //#define dilithium_aes256ctr_init DILITHIUM_NAMESPACE(dilithium_aes256ctr_init)
 //void dilithium_aes256ctr_init(aes256ctr_ctx *state,
-                              const uint8_t key[32],
-                              uint16_t nonce);
+                            //  const uint8_t key[32],
+                           //   uint16_t nonce);
 
 #define STREAM128_BLOCKBYTES AES256CTR_BLOCKBYTES
 #define STREAM256_BLOCKBYTES AES256CTR_BLOCKBYTES

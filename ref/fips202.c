@@ -724,7 +724,6 @@ void shake256(uint8_t *out, size_t outlen, const uint8_t *in, size_t inlen)
 {
   size_t nblocks;
   keccak_state state;
-
   shake256_absorb_once(&state, in, inlen);
   nblocks = outlen/SHAKE256_RATE;
   shake256_squeezeblocks(out, nblocks, &state);

@@ -19,7 +19,7 @@ public class PolynomialVector {
 
         for(i = 0; i < config.K; ++i)
             for(j = 0; j < config.L; ++j)
-                Polynomial.poly_uniform(mat[i+matIndex].vec[j],0, rho,rhoIndex, (i << 8) + j);
+                Polynomial.poly_uniform(mat[i+matIndex].vec[j],0, rho,rhoIndex, (((i << 8)&65535) + j)&65535);
     }
     //warning
     static void polyvec_matrix_pointwise_montgomery(polyveck t, polyvecl[] mat, polyvecl v) {
@@ -44,7 +44,7 @@ public class PolynomialVector {
         int i;
 
         for(i = 0; i < config.L; ++i)
-            Polynomial.poly_uniform_gamma1(0,v.vec[i],seedIndex, seed, config.L*nonce + i);
+            Polynomial.poly_uniform_gamma1(0,v.vec[i],seedIndex, seed, (config.L*nonce + i)&65535);
     }
    //warning!
     static void polyvecl_reduce(polyvecl v) {
@@ -142,7 +142,7 @@ public class PolynomialVector {
      * and 1 otherwise.
      **************************************************/
     //warning!
-    int polyvecl_chknorm(polyvecl v, int bound)  {
+    static int polyvecl_chknorm(polyvecl v, int bound)  {
         int i;
 
         for(i = 0; i < config.L; ++i)
@@ -301,7 +301,7 @@ public class PolynomialVector {
      * and 1 otherwise.
      **************************************************/
     //warning!
-    int polyveck_chknorm(polyveck v, int bound) {
+    static int polyveck_chknorm(polyveck v, int bound) {
         int i;
 
         for(i = 0; i < config.K; ++i)
@@ -367,9 +367,9 @@ public class PolynomialVector {
  *
  * Returns number of 1 bits.
  **************************************************/
-    int polyveck_make_hint(polyveck h,
-                                polyveck v0,
-                                polyveck v1)
+static int polyveck_make_hint(polyveck h,
+                              polyveck v0,
+                              polyveck v1)
     {
        int i, s = 0;
 

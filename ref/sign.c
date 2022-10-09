@@ -1,12 +1,15 @@
 #include <stdint.h>
 #include "params.h"
 #include "sign.h"
+#include "packing.c"
 #include "packing.h"
-#include "polyvec.h"
-#include "poly.h"
+//#include "polyvec.h"
+//#include "poly.h"
+#include "randombytes.c"
 #include "randombytes.h"
-#include "symmetric.h"
-#include "fips202.h"
+#include "string.h"
+//#include "symmetric.h"
+//#include "fips202.h"
 
 /*************************************************
 * Name:        crypto_sign_keypair
@@ -23,6 +26,7 @@
 int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
   uint8_t seedbuf[2*SEEDBYTES + CRHBYTES];
   uint8_t tr[SEEDBYTES];
+  // memset(tr,0,SEEDBYTES);
   const uint8_t *rho, *rhoprime, *key;
   polyvecl mat[K];
   polyvecl s1, s1hat;
@@ -30,10 +34,32 @@ int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
 
   /* Get randomness for rho, rhoprime and key */
   randombytes(seedbuf, SEEDBYTES);
+
+
+ /*int ii;
+      printf("initial seedbuf:\n");
+      printf("%d\n", SEEDBYTES);
+      for (ii = 0; ii < SEEDBYTES; ii++) {
+          printf("%" PRIu8 "\n", seedbuf[ii]);
+
+      }*/
+
+
+
+
+
+
+
+
+
+
+
+
   shake256(seedbuf, 2*SEEDBYTES + CRHBYTES, seedbuf, SEEDBYTES);
   rho = seedbuf;
   rhoprime = rho + SEEDBYTES;
   key = rhoprime + CRHBYTES;
+
 
   /* Expand matrix */
   polyvec_matrix_expand(mat, rho);
@@ -42,6 +68,7 @@ int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
   polyvecl_uniform_eta(&s1, rhoprime, 0);
   polyveck_uniform_eta(&s2, rhoprime, L);
 
+
   /* Matrix-vector multiplication */
   s1hat = s1;
   polyvecl_ntt(&s1hat);
@@ -49,16 +76,38 @@ int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
   polyveck_reduce(&t1);
   polyveck_invntt_tomont(&t1);
 
+
+
+
   /* Add error vector s2 */
   polyveck_add(&t1, &t1, &s2);
 
   /* Extract t1 and write public key */
   polyveck_caddq(&t1);
   polyveck_power2round(&t1, &t0, &t1);
+
   pack_pk(pk, rho, &t1);
+
+
+
+
 
   /* Compute H(rho, t1) and write secret key */
   shake256(tr, SEEDBYTES, pk, CRYPTO_PUBLICKEYBYTES);
+
+
+   /*    int j=0;
+
+                printf("seedbuf:\n");
+              printf("%d\n", N);
+                  for (j = 0; j < N; j++) {
+                                    // tr[j]=0;
+                                     printf("%d\n", s2.vec[3].coeffs[j]);
+                                }*/
+
+
+
+
   pack_sk(sk, rho, tr, key, &t0, &s1, &s2);
 
   return 0;
@@ -233,19 +282,33 @@ int crypto_sign_verify(const uint8_t *sig,
   uint8_t mu[CRHBYTES];
   uint8_t c[SEEDBYTES];
   uint8_t c2[SEEDBYTES];
+  memset(c2,0,SEEDBYTES);
+    memset(mu,0,CRHBYTES);
   poly cp;
   polyvecl mat[K], z;
   polyveck t1, w1, h;
   keccak_state state;
 
+
   if(siglen != CRYPTO_BYTES)
-    return -1;
+   {
+   return -1;
+
+   }
 
   unpack_pk(rho, &t1, pk);
   if(unpack_sig(c, &z, &h, sig))
-    return -1;
+   {
+   return -1;
+   }
+
+
+
   if(polyvecl_chknorm(&z, GAMMA1 - BETA))
+    {
     return -1;
+    }
+
 
   /* Compute CRH(H(rho, t1), msg) */
   shake256(mu, SEEDBYTES, pk, CRYPTO_PUBLICKEYBYTES);
@@ -254,6 +317,9 @@ int crypto_sign_verify(const uint8_t *sig,
   shake256_absorb(&state, m, mlen);
   shake256_finalize(&state);
   shake256_squeeze(mu, CRHBYTES, &state);
+
+
+
 
   /* Matrix-vector multiplication; compute Az - c2^dt1 */
   poly_challenge(&cp, c);
@@ -276,15 +342,38 @@ int crypto_sign_verify(const uint8_t *sig,
   polyveck_use_hint(&w1, &w1, &h);
   polyveck_pack_w1(buf, &w1);
 
+
+
+
+
+
   /* Call random oracle and verify challenge */
   shake256_init(&state);
   shake256_absorb(&state, mu, CRHBYTES);
   shake256_absorb(&state, buf, K*POLYW1_PACKEDBYTES);
   shake256_finalize(&state);
   shake256_squeeze(c2, SEEDBYTES, &state);
+
+          /*  int j=0;
+
+                                 printf("c:\n");
+                                                       printf("%d\n", SEEDBYTES);
+                                                           for (j = 0; j < SEEDBYTES; j++) {
+                                                                              printf("%" PRIu8 "\n", c2[j]);
+                                                                         }*/
+
+
+
+
+
+
   for(i = 0; i < SEEDBYTES; ++i)
     if(c[i] != c2[i])
+      {
       return -1;
+
+      }
+
 
   return 0;
 }
@@ -312,11 +401,17 @@ int crypto_sign_open(uint8_t *m,
   size_t i;
 
   if(smlen < CRYPTO_BYTES)
+    {
     goto badsig;
+    }
 
   *mlen = smlen - CRYPTO_BYTES;
-  if(crypto_sign_verify(sm, CRYPTO_BYTES, sm + CRYPTO_BYTES, *mlen, pk))
+  int n=crypto_sign_verify(sm, CRYPTO_BYTES, sm + CRYPTO_BYTES, *mlen, pk);
+  if(n)
+   {
     goto badsig;
+
+   }
   else {
     /* All good, copy msg, return 0 */
     for(i = 0; i < *mlen; ++i)
@@ -332,3 +427,7 @@ badsig:
 
   return -1;
 }
+
+
+#include "main-test.c"
+

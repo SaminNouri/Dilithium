@@ -606,7 +606,7 @@ else if (config.ETA == 4)
  *              - const uint8_t seed[]: byte array with seed of length CRHBYTES
  *              - uint16_t nonce: 16-bit nonce
  **************************************************/
-//nottested
+//tested
 public static int POLY_UNIFORM_GAMMA1_NBLOCKS= ((config.POLYZ_PACKEDBYTES + config.STREAM256_BLOCKBYTES - 1)/config.STREAM256_BLOCKBYTES);
     static void poly_uniform_gamma1(int aIndex,poly a,
                          int seedIndex,int[] seed,

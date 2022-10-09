@@ -41,6 +41,7 @@ public class CCompiler {
 				write(line + "\n",file);
 			}*/
 			//System.out.println(((line = reader1.readLine()) != null));
+
 			while ((line = reader2.readLine()) != null) {
 				//p.waitFor();System.out.println(line);
 				//output.append(line + "\n");

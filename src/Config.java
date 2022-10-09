@@ -27,7 +27,10 @@ public class Config {
         reader = new FileReader("src/values.properties");
         Properties p = new Properties();
         p.load(reader);
+
         int dilithiumMode=Integer.parseInt(p.getProperty("DilithiumMode"));
+
+        DILITHIUM_RANDOMIZED_SIGNING=Integer.parseInt(p.getProperty("DILITHIUM_RANDOMIZED_SIGNING"));
 
         isAESUsed=Integer.parseInt(p.getProperty("AESUSE"));
 
@@ -135,6 +138,7 @@ public class Config {
 
 
     public static final int AES256CTR_BLOCKBYTES= 64;
+    public static int DILITHIUM_RANDOMIZED_SIGNING=1;
 
 
 
